@@ -1,5 +1,4 @@
-const API_URL = 'http://localhost:3000/api/complaints';
-
+const API_URL = "https://grievance-backend.onrender.com";
 // Utility: Base64 Image Converter
 const getBase64 = (file) => {
     return new Promise((resolve, reject) => {
