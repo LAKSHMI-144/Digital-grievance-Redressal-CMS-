@@ -2,87 +2,162 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>G-Portal | 3D</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Grievance Redressal Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="styles.css">
-</head>
-<body class="flex flex-col items-center min-h-screen text-white">
-    <nav class="w-full flex justify-between p-8">
-        <div class="text-2xl font-bold italic">GP.3D</div>
-        <div class="space-x-6 text-sm">
-            <a href="pages/student-login.html" class="hover:text-blue-400 font-bold transition-colors">STUDENT</a>
-            <a href="department/department-login.html" class="hover:text-orange-400 font-bold transition-colors">DEPARTMENT</a>
-            <a href="admin/admin-login.html" class="hover:text-emerald-400 font-bold transition-colors">ADMIN</a>
-        </div>
-    </nav>
-
-    <div class="text-center mt-20 animate-in">
-        <h1 class="text-6xl md:text-8xl font-extrabold mb-6 tracking-tighter">Your Voice.<br><span class="text-indigo-500">Amplified.</span></h1>
-        <div class="flex gap-4 justify-center">
-            <a href="pages/student-login.html" class="btn-primary px-10">Student Login</a>
-            <a href="department/department-login.html" class="glass-panel px-10 py-4 font-bold border-white/10 text-orange-400 hover:bg-orange-500/10 transition-colors">Staff Login</a>
-        </div>
-    </div>
-
-    <!-- Workflow Section -->
-    <div class="mt-32 w-full max-w-6xl px-8 pb-20">
-        <h2 class="text-3xl font-bold text-center mb-16 uppercase tracking-widest text-slate-300">System Workflows</h2>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
         
-        <div class="grid md:grid-cols-3 gap-12 text-center">
-            <!-- Student Workflow -->
-            <div class="glass-panel p-8 rounded-2xl border-t-4 border-blue-500 hover:-translate-y-2 transition-transform duration-300">
-                <h3 class="text-xl font-bold mb-8 text-blue-400">Student Complaint Workflow</h3>
-                <div class="flex flex-col items-center gap-2">
-                    <div class="w-full py-3 px-4 bg-blue-500/20 border border-blue-500/30 rounded-xl font-medium text-sm">Student</div>
-                    <i class="fa-solid fa-arrow-down text-blue-400/50"></i>
-                    <div class="w-full py-3 px-4 bg-transparent border border-white/20 rounded-xl font-medium text-sm">Login Page</div>
-                    <i class="fa-solid fa-arrow-down text-blue-400/50"></i>
-                    <div class="w-full py-3 px-4 bg-transparent border border-white/20 rounded-xl font-medium text-sm">Authentication Server</div>
-                    <i class="fa-solid fa-arrow-down text-blue-400/50"></i>
-                    <div class="w-full py-3 px-4 bg-transparent border border-white/20 rounded-xl font-medium text-sm">Student Dashboard</div>
-                    <i class="fa-solid fa-arrow-down text-blue-400/50"></i>
-                    <div class="w-full py-3 px-4 bg-transparent border border-white/20 rounded-xl font-medium text-sm">Complaint Form</div>
-                    <i class="fa-solid fa-arrow-down text-blue-400/50"></i>
-                    <div class="w-full py-3 px-4 bg-blue-500/10 border border-blue-500/20 rounded-xl font-medium text-sm flex items-center justify-center gap-2"><i class="fa-solid fa-database"></i> Database</div>
-                    <i class="fa-solid fa-arrow-down text-blue-400/50"></i>
-                    <div class="w-full py-3 px-4 bg-transparent border border-white/20 rounded-xl font-medium text-sm">Status Tracking Module</div>
-                    <i class="fa-solid fa-arrow-down text-blue-400/50"></i>
-                    <div class="w-full py-3 px-4 bg-transparent border border-white/20 rounded-xl font-medium text-sm">Email Notification System</div>
-                    <i class="fa-solid fa-arrow-down text-blue-400/50"></i>
-                    <div class="w-full py-3 px-4 bg-transparent border border-white/20 rounded-xl font-medium text-sm flex items-center justify-center gap-2"><i class="fa-solid fa-envelope"></i> Student Inbox</div>
-                </div>
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up {
+            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        
+        /* New Continuous Animations */
+        @keyframes blob {
+            0% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .animate-blob {
+            animation: blob 8s infinite ease-in-out;
+        }
+        .animation-delay-2000 {
+            animation-delay: 2s;
+        }
+        .animation-delay-4000 {
+            animation-delay: 4s;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-12px); }
+            100% { transform: translateY(0px); }
+        }
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+        .float-delay-1 { animation-delay: 0s; }
+        .float-delay-2 { animation-delay: 2s; }
+        .float-delay-3 { animation-delay: 4s; }
+    </style>
+</head>
+<body class="bg-slate-950 text-white min-h-screen flex flex-col font-sans relative overflow-x-hidden selection:bg-indigo-500/30">
+    
+    <!-- Dark gradient background -->
+    <div class="absolute inset-0 bg-gradient-to-br from-[#0B0F19] via-[#111827] to-[#1e1b4b] z-0"></div>
+    
+    <!-- Decorative glow effects -->
+    <div class="absolute top-[10%] left-[20%] w-[30rem] h-[30rem] rounded-full bg-blue-600/10 blur-[120px] mix-blend-screen pointer-events-none z-0 animate-blob"></div>
+    <div class="absolute bottom-[20%] right-[10%] w-[40rem] h-[40rem] rounded-full bg-purple-600/10 blur-[120px] mix-blend-screen pointer-events-none z-0 animate-blob animation-delay-2000"></div>
+
+    <!-- Main Wrapper -->
+    <div class="relative z-10 flex flex-col min-h-screen w-full">
+        <!-- Header / Navbar -->
+        <nav class="w-full flex items-center justify-between p-6 lg:px-12 glass-card border-x-0 border-t-0 border-b border-white/5 rounded-none">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-building-columns text-indigo-400 text-2xl"></i>
+                <span class="text-xl font-bold tracking-tight">Digital Grievance Portal</span>
+            </div>
+            
+            <div class="hidden md:flex items-center gap-6 text-sm font-semibold tracking-wide">
+                <a href="pages/student-login.html" class="text-slate-300 hover:text-blue-400 transition-colors uppercase">Student Login</a>
+                <a href="department/department-login.html" class="text-slate-300 hover:text-orange-400 transition-colors uppercase">Department Login</a>
+                <a href="admin/admin-login.html" class="text-slate-300 hover:text-emerald-400 transition-colors uppercase">Admin Login</a>
             </div>
 
-            <!-- Admin Workflow -->
-            <div class="glass-panel p-8 rounded-2xl border-t-4 border-green-500 hover:-translate-y-2 transition-transform duration-300">
-                <h3 class="text-xl font-bold mb-8 text-green-400">Admin Workflow</h3>
-                <div class="flex flex-col items-center gap-2">
-                    <div class="w-full py-3 px-4 bg-green-500/20 border border-green-500/30 rounded-full font-medium text-sm">Admin</div>
-                    <i class="fa-solid fa-arrow-down text-green-400/50"></i>
-                    <div class="w-full py-3 px-4 bg-green-500/10 border border-green-500/20 rounded-xl font-medium text-sm">Admin Login</div>
-                    <i class="fa-solid fa-arrow-down text-green-400/50"></i>
-                    <div class="w-full py-3 px-4 bg-green-500/10 border border-green-500/20 rounded-xl font-medium text-sm">View Complaints</div>
-                    <i class="fa-solid fa-arrow-down text-green-400/50"></i>
-                    <div class="w-full py-3 px-4 bg-green-500/10 border border-green-500/20 rounded-xl font-medium text-sm">Assign to Department</div>
-                    <i class="fa-solid fa-arrow-down text-green-400/50"></i>
-                    <div class="w-full py-3 px-4 bg-green-500/10 border border-green-500/20 rounded-xl font-medium text-sm">View Reports</div>
-                </div>
+            <!-- Mobile Menu Icon -->
+            <button class="md:hidden text-slate-300 hover:text-white">
+                <i class="fa-solid fa-bars text-xl"></i>
+            </button>
+        </nav>
+
+        <!-- Main Portal Section -->
+        <main class="flex-grow flex flex-col items-center justify-center p-6 text-center w-full max-w-7xl mx-auto">
+            
+            <div class="mb-16 animate-fade-in-up mt-8">
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-300">
+                    Digital Grievance <br class="md:hidden" />Redressal Portal
+                </h1>
+                <p class="text-lg text-slate-400 max-w-2xl mx-auto font-medium">
+                    Submit and track complaints efficiently.
+                </p>
             </div>
 
-            <!-- Department Workflow -->
-            <div class="glass-panel p-8 rounded-2xl border-t-4 border-orange-500 hover:-translate-y-2 transition-transform duration-300">
-                <h3 class="text-xl font-bold mb-8 text-orange-400">Department Workflow</h3>
-                <div class="flex flex-col items-center gap-2">
-                    <div class="w-full py-3 px-4 bg-orange-500/20 border border-orange-500/30 rounded-full font-medium text-sm">Department User</div>
-                    <i class="fa-solid fa-arrow-down text-orange-400/50"></i>
-                    <div class="w-full py-3 px-4 bg-orange-500/10 border border-orange-500/20 rounded-xl font-medium text-sm">View Assignments</div>
-                    <i class="fa-solid fa-arrow-down text-orange-400/50"></i>
-                    <div class="w-full py-3 px-4 bg-orange-500/10 border border-orange-500/20 rounded-xl font-medium text-sm">Update Status</div>
-                    <i class="fa-solid fa-arrow-down text-orange-400/50"></i>
-                    <div class="w-full py-3 px-4 bg-orange-500/10 border border-orange-500/20 rounded-xl font-medium text-sm">Notify Student</div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 w-full animate-fade-in-up" style="animation-delay: 0.1s;">
+                <!-- Student Portal -->
+                <div class="glass-card p-10 rounded-3xl transition-transform duration-300 flex flex-col items-center group relative overflow-hidden animate-float float-delay-1 hover:!translate-y-[-16px]">
+                    <div class="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div class="w-20 h-20 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 text-3xl mb-6 shadow-lg shadow-blue-500/10 group-hover:scale-110 transition-transform duration-300">
+                        <i class="fa-solid fa-user-graduate"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold mb-3 text-white">Student Portal</h2>
+                    <p class="text-slate-400 text-sm mb-10 text-center leading-relaxed">
+                        Access your dashboard to file new complaints and track existing ones.
+                    </p>
+                    <div class="mt-auto w-full space-y-3 relative z-10">
+                        <a href="pages/student-login.html" class="block w-full py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-blue-600/20 active:scale-[0.98]">
+                            Student Login
+                        </a>
+                        <a href="pages/student-register.html" class="block w-full py-3.5 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-xl transition-all border border-white/10 active:scale-[0.98]">
+                            Register
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Admin Portal -->
+                <div class="glass-card p-10 rounded-3xl transition-transform duration-300 flex flex-col items-center group relative overflow-hidden animate-float float-delay-2 hover:!translate-y-[-16px]">
+                    <div class="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div class="w-20 h-20 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-3xl mb-6 shadow-lg shadow-emerald-500/10 group-hover:scale-110 transition-transform duration-300 relative z-10">
+                        <i class="fa-solid fa-user-shield"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold mb-3 text-white">Admin Portal</h2>
+                    <p class="text-slate-400 text-sm mb-10 text-center leading-relaxed">
+                        Manage system-wide grievances, oversee departments, and view analytics.
+                    </p>
+                    <div class="mt-auto w-full relative z-10">
+                        <a href="admin/admin-login.html" class="block w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-emerald-600/20 active:scale-[0.98]">
+                            Admin Login
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Department Portal -->
+                <div class="glass-card p-10 rounded-3xl transition-transform duration-300 flex flex-col items-center group relative overflow-hidden animate-float float-delay-3 hover:!translate-y-[-16px]">
+                    <div class="absolute inset-0 bg-orange-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div class="w-20 h-20 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400 text-3xl mb-6 shadow-lg shadow-orange-500/10 group-hover:scale-110 transition-transform duration-300">
+                        <i class="fa-solid fa-briefcase"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold mb-3 text-white">Department Portal</h2>
+                    <p class="text-slate-400 text-sm mb-10 text-center leading-relaxed">
+                        Review assigned complaints, update resolution status, and notify students.
+                    </p>
+                    <div class="mt-auto w-full relative z-10">
+                        <a href="department/department-login.html" class="block w-full py-3.5 bg-orange-600 hover:bg-orange-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-orange-600/20 active:scale-[0.98]">
+                            Department Login
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
+            
+        </main>
+        
+        <!-- Footer -->
+        <footer class="w-full text-center p-6 text-slate-500 text-sm font-medium border-t border-white/5 bg-white/[0.02]">
+            &copy; 2026 Digital Grievance Redressal System
+        </footer>
     </div>
 </body>
 </html>
