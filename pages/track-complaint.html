@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Track Complaint | Student Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body class="bg-slate-900 text-white font-inter min-h-screen flex flex-col selection:bg-indigo-500/30">
+    <nav class="p-6">
+        <a href="student-dashboard.html" class="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm font-medium">
+            <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </nav>
+
+    <main class="flex-grow flex flex-col items-center justify-center p-4">
+        <div class="w-full max-w-xl text-center mb-10">
+            <h1 class="text-4xl font-extrabold mb-4">Track Progress</h1>
+            <p class="text-slate-400">Enter your Grievance ID directly below.</p>
+        </div>
+
+        <form id="trackForm" class="w-full max-w-md relative animate-fade-in-up">
+            <div class="glass-card rounded-2xl p-2 flex items-center">
+                <i class="fa-solid fa-magnifying-glass pl-4 text-slate-400"></i>
+                <input type="text" id="trackID" required class="w-full bg-transparent px-4 py-3 text-white placeholder-slate-500 focus:outline-none uppercase font-mono tracking-wider" placeholder="GRV-XXXX">
+                <button type="submit" class="btn-primary py-3 px-6 shrink-0">Track</button>
+            </div>
+        </form>
+
+        <div id="statusResult" class="hidden w-full max-w-xl glass-card rounded-3xl p-8 mt-10 animate-fade-in-up">
+            <div class="flex justify-between items-start border-b border-white/10 pb-6 mb-6">
+                <div>
+                    <h2 class="text-sm text-slate-400 uppercase tracking-widest font-semibold mb-1">Grievance</h2>
+                    <p id="resID" class="text-2xl font-bold font-mono text-white">GRV-XXXX</p>
+                </div>
+                <div id="resBadge"></div>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <p class="text-xs text-slate-500 uppercase">Title & Category</p>
+                    <p id="resTitle" class="font-medium text-slate-200"></p>
+                    <p id="resCat" class="text-sm text-indigo-400 font-bold"></p>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-500 uppercase">Assigned Department</p>
+                    <p id="resDept" class="font-medium text-slate-300"></p>
+                </div>
+                
+                <div id="deptNoteContainer" class="hidden mt-6 p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-xl">
+                    <p class="text-xs text-indigo-400 font-bold uppercase mb-1">Department Response Note</p>
+                    <p id="resNote" class="text-sm text-slate-300 italic"></p>
+                </div>
+            </div>
+        </div>
+
+        <div id="errorState" class="hidden w-full max-w-md text-center text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl p-4 mt-8 animate-fade-in">
+            <i class="fa-solid fa-circle-exclamation mr-2"></i> Tracking ID not found. Ensure it was typed correctly.
+        </div>
+    </main>
+
+    <script src="../assets/script.js"></script>
+    <script>
+        document.getElementById('trackForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const id = document.getElementById('trackID').value.toUpperCase().trim();
+            const data = JSON.parse(localStorage.getItem('sys_complaints') || '[]');
+            const found = data.find(x => x.id === id);
+
+            if(found) {
+                document.getElementById('errorState').classList.add('hidden');
+                document.getElementById('statusResult').classList.remove('hidden');
+                
+                document.getElementById('resID').innerText = found.id;
+                document.getElementById('resTitle').innerText = found.title;
+                document.getElementById('resCat').innerText = found.category;
+                document.getElementById('resDept').innerText = found.assignedDepartment || 'Pending Assignment';
+                document.getElementById('resBadge').innerHTML = getStatusBadge(found.status);
+
+                if(found.departmentResponse) {
+                    document.getElementById('resNote').innerText = `"${found.departmentResponse}"`;
+                    document.getElementById('deptNoteContainer').classList.remove('hidden');
+                } else {
+                    document.getElementById('deptNoteContainer').classList.add('hidden');
+                }
+            } else {
+                document.getElementById('statusResult').classList.add('hidden');
+                document.getElementById('errorState').classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
