@@ -135,7 +135,7 @@ const handleLogin = (formId, role, redirectUrl, requiresOtp = false) => {
         btn.disabled = true;
 
         if (role === 'student') {
-            fetch('http://localhost:3000/api/login', {
+            fetch(`${API_URL}/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ studentId: identifier, password: password })
