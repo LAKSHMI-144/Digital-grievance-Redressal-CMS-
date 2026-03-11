@@ -134,6 +134,37 @@ const handleLogin = (formId, role, redirectUrl, requiresOtp = false) => {
         btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Authenticating...`;
         btn.disabled = true;
 
+        if (role === 'student') {
+            fetch('http://localhost:3000/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ studentId: identifier, password: password })
+            })
+            .then(res => res.json().then(data => ({ status: res.status, ok: res.ok, data })))
+            .then(res => {
+                if (!res.ok) {
+                    alert(res.data.error || "Invalid login credentials");
+                    btn.innerHTML = origText;
+                    btn.disabled = false;
+                } else {
+                    localStorage.setItem('user', JSON.stringify({
+                        email: identifier, // keep for compat with older systems
+                        studentId: res.data.data.studentId,
+                        name: res.data.data.name,
+                        role: role,
+                        department: null
+                    }));
+                    window.location.href = redirectUrl;
+                }
+            })
+            .catch(err => {
+                alert("Network error. Is the server running?");
+                btn.innerHTML = origText;
+                btn.disabled = false;
+            });
+            return;
+        }
+
         setTimeout(() => {
             if (requiresOtp) {
                 // Generate a 6-digit mock OTP

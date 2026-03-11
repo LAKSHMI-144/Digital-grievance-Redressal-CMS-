@@ -39,6 +39,9 @@
         </div>
 
         <form id="studentRegisterForm" class="space-y-5">
+            <div id="registerError" class="hidden text-red-400 text-sm font-semibold text-center bg-red-500/10 border border-red-500/20 p-3 rounded-xl mb-4">
+                <i class="fa-solid fa-circle-exclamation mr-1"></i> <span id="registerErrorMsg">Error</span>
+            </div>
             <div>
                 <label class="text-xs font-semibold text-slate-300 uppercase tracking-wide">Full Name</label>
                 <input type="text" id="name" required class="w-full mt-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/50 transition-colors" placeholder="John Doe">
@@ -62,17 +65,47 @@
         </div>
     </div>
 
-    <script src="../script.js"></script>
+    <script src="../assets/script.js"></script>
     <script>
-        // Use the handleLogin style for registration mockup
-        document.getElementById('studentRegisterForm').addEventListener('submit', (e) => {
+        document.getElementById('studentRegisterForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = e.target.querySelector('button[type="submit"]');
+            const origHTML = btn.innerHTML;
+            
             btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Registering...`;
-            setTimeout(() => {
-                alert("Registration successful! Please login.");
-                window.location.href = 'student-login.html';
-            }, 800);
+            btn.disabled = true;
+            
+            const errorDiv = document.getElementById('registerError');
+            errorDiv.classList.add('hidden');
+
+            const name = document.getElementById('name').value;
+            const studentId = document.getElementById('studentId').value;
+            const passwordElement = e.target.querySelector('input[type="password"]');
+            const password = passwordElement ? passwordElement.value : '';
+
+            try {
+                const res = await fetch('http://localhost:3000/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, studentId, password })
+                });
+                
+                const data = await res.json();
+                
+                if (!res.ok) {
+                    document.getElementById('registerErrorMsg').innerText = data.error || 'Registration failed';
+                    errorDiv.classList.remove('hidden');
+                } else {
+                    alert("Registration successful! Please login.");
+                    window.location.href = 'student-login.html';
+                }
+            } catch (err) {
+                document.getElementById('registerErrorMsg').innerText = "Network error. Is the server running?";
+                errorDiv.classList.remove('hidden');
+            } finally {
+                btn.innerHTML = origHTML;
+                btn.disabled = false;
+            }
         });
     </script>
 </body>

@@ -93,6 +93,51 @@ app.patch('/api/complaints/:id/status', (req, res) => {
     });
 });
 
+// API: Student Register
+app.post('/api/register', (req, res) => {
+    const { studentId, name, password } = req.body;
+    
+    // Check if ID is provided
+    if (!studentId || !name || !password) {
+        return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    const sql = `INSERT INTO students (student_id, name, password) VALUES (?, ?, ?)`;
+    db.run(sql, [studentId.toUpperCase(), name, password], function(err) {
+        if (err) {
+            // Check for SQLite constraint violation (UNIQUE)
+            if (err.message.includes("UNIQUE constraint failed: students.student_id")) {
+                return res.status(400).json({ error: "Student ID already registered" });
+            }
+            return res.status(500).json({ error: "Database error during registration" });
+        }
+        res.json({ message: "Registration successful" });
+    });
+});
+
+// API: Student Login
+app.post('/api/login', (req, res) => {
+    const { studentId, password } = req.body;
+    
+    if (!studentId || !password) {
+        return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    const sql = `SELECT * FROM students WHERE student_id = ? AND password = ?`;
+    db.get(sql, [studentId.toUpperCase(), password], (err, row) => {
+        if (err) {
+            return res.status(500).json({ error: "Database error during login" });
+        }
+        if (row) {
+            // Found matched user credentials
+            res.json({ message: 'success', data: { studentId: row.student_id, name: row.name } });
+        } else {
+            // Invalid ID or Password
+            res.status(401).json({ error: 'Invalid login credentials' });
+        }
+    });
+});
+
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });

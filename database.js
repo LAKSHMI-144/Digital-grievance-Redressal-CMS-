@@ -21,7 +21,18 @@ const db = new sqlite3.Database(dbPath, (err) => {
             createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
         )`, (err) => {
             if (err) {
-                console.error('Error creating table', err.message);
+                console.error('Error creating complaints table', err.message);
+            }
+        });
+        
+        db.run(`CREATE TABLE IF NOT EXISTS students (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            student_id TEXT UNIQUE,
+            name TEXT,
+            password TEXT
+        )`, (err) => {
+            if (err) {
+                console.error('Error creating students table', err.message);
             }
         });
     }
