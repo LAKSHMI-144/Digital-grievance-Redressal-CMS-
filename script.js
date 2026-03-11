@@ -1,4 +1,4 @@
-const API_URL = "https://grievance-backend.onrender.com";
+const API_URL = "https://digital-grievance-backend.onrender.com";
 console.log("updated grievance portal UI");
 // Utility: Base64 Image Converter
 const getBase64 = (file) => {
