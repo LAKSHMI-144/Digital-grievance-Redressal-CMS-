@@ -84,7 +84,7 @@
             const password = passwordElement ? passwordElement.value : '';
 
             try {
-                const res = await fetch('https://grievance-backend.onrender.com/api/register', {
+                const res = await fetch('/api/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name, studentId, password })

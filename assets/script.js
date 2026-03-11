@@ -1,4 +1,4 @@
-const API_URL = "https://grievance-backend.onrender.com";
+const API_URL = "/api";
 
 // ==========================================
 // UTILITY FUNCTIONS
