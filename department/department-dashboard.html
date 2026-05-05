@@ -87,13 +87,13 @@
 
     <!-- Update Action Modal -->
     <div id="deptModal" class="hidden absolute inset-0 z-50 bg-[#0B0F19]/90 backdrop-blur-md flex items-center justify-center p-4">
-        <div class="glass-card w-full max-w-lg bg-slate-900 rounded-2xl border border-slate-700 shadow-2xl overflow-hidden animate-fade-in-up">
-            <div class="p-6 border-b border-white/5 flex justify-between items-center">
+        <div class="glass-card w-full max-w-lg bg-slate-900 rounded-2xl border border-slate-700 shadow-2xl overflow-hidden animate-fade-in-up flex flex-col max-h-[90vh]">
+            <div class="p-6 border-b border-white/5 flex justify-between items-center shrink-0">
                 <h3 class="font-bold text-lg"><span class="text-orange-400">Update</span> Ticket</h3>
                 <button onclick="closeDeptModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-times h-5 w-5"></i></button>
             </div>
             
-            <div class="p-6 space-y-4">
+            <div class="p-6 space-y-4 overflow-y-auto custom-scrollbar">
                 <div class="flex justify-between items-center bg-white/5 p-4 rounded-xl border border-white/10">
                     <div>
                         <p class="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Grievance ID</p>
@@ -132,7 +132,7 @@
                 </div>
             </div>
 
-            <div class="p-6 border-t border-white/5 bg-slate-900 flex justify-end gap-3 items-center">
+            <div class="p-6 border-t border-white/5 bg-slate-900 flex justify-end gap-3 items-center shrink-0">
                 <span class="text-[10px] text-slate-500 uppercase mr-auto hidden md:block"><i class="fa-solid fa-bell text-orange-400/50"></i> Student will be notified automatically</span>
                 <button onclick="closeDeptModal()" class="px-6 py-2 bg-white/5 hover:bg-white/10 rounded-lg font-bold text-sm transition-colors text-slate-300">Cancel</button>
                 <button id="modalUpdateBtn" class="px-6 py-2 bg-orange-600 hover:bg-orange-700 rounded-lg font-bold text-sm transition-colors shadow-lg active:scale-95 text-white">Update & Notify</button>

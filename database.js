@@ -7,6 +7,26 @@ const db = new sqlite3.Database(dbPath, (err) => {
         console.error('Error opening database', err.message);
     } else {
         console.log('Connected to the SQLite database.');
+        
+        // Create Students table
+        db.run(`CREATE TABLE IF NOT EXISTS students (
+            id TEXT PRIMARY KEY,
+            name TEXT,
+            studentId TEXT UNIQUE,
+            password TEXT,
+            email TEXT,
+            phone TEXT,
+            department TEXT,
+            semester TEXT,
+            createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+            lastLogin DATETIME
+        )`, (err) => {
+            if (err) {
+                console.error('Error creating students table', err.message);
+            }
+        });
+        
+        // Create Complaints table
         db.run(`CREATE TABLE IF NOT EXISTS complaints (
             id TEXT PRIMARY KEY,
             name TEXT,
@@ -21,7 +41,7 @@ const db = new sqlite3.Database(dbPath, (err) => {
             createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
         )`, (err) => {
             if (err) {
-                console.error('Error creating table', err.message);
+                console.error('Error creating complaints table', err.message);
             }
         });
     }

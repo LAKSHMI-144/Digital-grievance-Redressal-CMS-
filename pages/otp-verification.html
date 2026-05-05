@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>2FA Verification | GrievanceHub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body class="flex items-center justify-center min-h-screen relative overflow-hidden bg-slate-950">
+    <!-- Ambient Lights -->
+    <div class="absolute top-[30%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-[50vw] h-[50vw] rounded-full bg-blue-600/10 blur-[120px] animate-blob mix-blend-screen"></div>
+
+    <div class="glass-card border-blue-500/20 w-full max-w-md p-10 rounded-3xl relative z-10 animate-fade-in-up">
+        <div class="text-center mb-8">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-500/30">
+                <i class="fa-solid fa-mobile-screen-button text-2xl text-white"></i>
+            </div>
+            <h1 class="text-3xl font-bold">Two-Step Verification</h1>
+            <p class="text-slate-400 text-sm mt-2">Enter the 6-digit OTP sent to your device.</p>
+        </div>
+
+        <form id="otpForm" class="space-y-6">
+            <div class="flex justify-between space-x-2 otp-inputs">
+                <input type="text" maxlength="1" required class="w-12 h-14 text-center text-2xl font-bold bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-blue-500/50 transition-colors" />
+                <input type="text" maxlength="1" required class="w-12 h-14 text-center text-2xl font-bold bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-blue-500/50 transition-colors" />
+                <input type="text" maxlength="1" required class="w-12 h-14 text-center text-2xl font-bold bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-blue-500/50 transition-colors" />
+                <input type="text" maxlength="1" required class="w-12 h-14 text-center text-2xl font-bold bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-blue-500/50 transition-colors" />
+                <input type="text" maxlength="1" required class="w-12 h-14 text-center text-2xl font-bold bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-blue-500/50 transition-colors" />
+                <input type="text" maxlength="1" required class="w-12 h-14 text-center text-2xl font-bold bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-blue-500/50 transition-colors" />
+            </div>
+            
+            <div id="otpError" class="hidden text-red-400 text-sm font-semibold text-center mt-2">
+                <i class="fa-solid fa-circle-exclamation mr-1"></i> Invalid OTP. Please try again.
+            </div>
+
+            <div class="flex items-center justify-between text-sm">
+                <span class="text-slate-400">Code expires in:</span>
+                <span id="timerDisplay" class="text-blue-400 font-bold font-mono">01:00</span>
+            </div>
+            <div class="w-full bg-slate-800 rounded-full h-1.5 mb-4 overflow-hidden">
+                <div id="timerBar" class="bg-blue-500 h-1.5 rounded-full transition-all duration-1000 ease-linear" style="width: 100%"></div>
+            </div>
+            
+            <button type="submit" class="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-500/30 active:scale-95">Verify & Login</button>
+        </form>
+
+        <div class="mt-6 text-center pt-4 border-t border-white/10">
+            <button id="resendOtpBtn" class="text-xs text-blue-400 hover:text-blue-300 font-semibold disabled:opacity-50 disabled:cursor-not-allowed">Resend OTP Code</button>
+        </div>
+    </div>
+
+    <script src="../assets/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tempAuth = JSON.parse(localStorage.getItem('temp_auth'));
+            if(!tempAuth) {
+                // If accessed directly without pending auth, redirect user
+                window.location.href = '../index.html'; 
+                return;
+            }
+
+            let timeLeft = Math.floor((tempAuth.expiry - new Date().getTime()) / 1000);
+            const timerDisplay = document.getElementById('timerDisplay');
+            const timerBar = document.getElementById('timerBar');
+            const resendBtn = document.getElementById('resendOtpBtn');
+            const btnSubmit = document.querySelector('button[type="submit"]');
+
+            // --- Timer Core ---
+            const updateTimer = () => {
+                const now = new Date().getTime();
+                timeLeft = Math.floor((tempAuth.expiry - now) / 1000);
+                
+                if (timeLeft <= 0) {
+                    timerDisplay.innerText = "00:00";
+                    timerBar.style.width = "0%";
+                    timerDisplay.classList.replace('text-blue-400', 'text-red-500');
+                    timerBar.classList.replace('bg-blue-500', 'bg-red-500');
+                    resendBtn.disabled = false;
+                    btnSubmit.disabled = true;
+                    btnSubmit.innerText = "Code Expired";
+                    return;
+                }
+                
+                resendBtn.disabled = true;
+                timerDisplay.innerText = `00:${timeLeft.toString().padStart(2, '0')}`;
+                // Percent calculation for the bar width
+                timerBar.style.width = `${(timeLeft / 60) * 100}%`;
+            };
+
+            updateTimer();
+            const timerInterval = setInterval(updateTimer, 1000);
+
+            // --- Resend OTP Logic ---
+            resendBtn.addEventListener('click', () => {
+                const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
+                tempAuth.otp = newOtp;
+                tempAuth.expiry = new Date().getTime() + 60000;
+                localStorage.setItem('temp_auth', JSON.stringify(tempAuth));
+                
+                // Trigger the email sending logic
+                if (window.sendOTPToEmail) {
+                    window.sendOTPToEmail(tempAuth.identifier, newOtp);
+                } else {
+                    alert(`[MOCK 2FA SYSTEM] Your NEW verification code is: ${newOtp}`);
+                }
+                
+                timerDisplay.classList.replace('text-red-500', 'text-blue-400');
+                timerBar.classList.replace('bg-red-500', 'bg-blue-500');
+                btnSubmit.disabled = false;
+                btnSubmit.innerText = "Verify & Login";
+                
+                // Clear inputs
+                inputs.forEach(input => {
+                    input.value = "";
+                    input.classList.remove('border-red-500', 'text-red-500');
+                });
+                document.getElementById('otpError').classList.add('hidden');
+                
+                updateTimer();
+                inputs[0].focus();
+            });
+
+            // --- OTP Input Auto-Advance & Delete ---
+            const inputs = document.querySelectorAll('.otp-inputs input');
+            inputs.forEach((input, index) => {
+                input.addEventListener('input', (e) => {
+                    input.classList.remove('border-red-500', 'text-red-500');
+                    // Automatically focus next field if a number is typed
+                    if (e.target.value.match(/^[0-9]$/)) {
+                        if (index < inputs.length - 1) {
+                            inputs[index + 1].focus();
+                        }
+                    } else {
+                        // Clear non-numeric values
+                        e.target.value = "";
+                    }
+                });
+                input.addEventListener('keydown', (e) => {
+                    // Backspace to previous
+                    if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                        inputs[index - 1].focus();
+                    }
+                });
+            });
+
+            // --- Form Verification ---
+            const form = document.getElementById('otpForm');
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                let enteredOtp = "";
+                inputs.forEach(input => enteredOtp += input.value);
+                
+                if (enteredOtp === tempAuth.otp) {
+                    const origHtml = btnSubmit.innerHTML;
+                    btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Verifying...`;
+                    
+                    setTimeout(() => {
+                        // Login Success: Hydrate regular auth
+                        localStorage.setItem('user', JSON.stringify({
+                            email: tempAuth.identifier,
+                            name: tempAuth.name,
+                            role: tempAuth.role,
+                            department: tempAuth.department
+                        }));
+                        localStorage.removeItem('temp_auth');
+                        window.location.href = tempAuth.redirectUrl; // Redirect to Dashboard
+                    }, 800);
+                } else {
+                    document.getElementById('otpError').classList.remove('hidden');
+                    inputs.forEach(input => {
+                        input.value = "";
+                        input.classList.add('border-red-500', 'text-red-500');
+                    });
+                    inputs[0].focus();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

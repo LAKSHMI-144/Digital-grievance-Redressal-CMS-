@@ -93,6 +93,123 @@ app.patch('/api/complaints/:id/status', (req, res) => {
     });
 });
 
+// ==========================================
+// STUDENT AUTHENTICATION ENDPOINTS
+// ==========================================
+
+// API: Register a new student
+app.post('/api/students/register', (req, res) => {
+    const { name, studentId, password, email, phone, department, semester } = req.body;
+    
+    if (!name || !studentId || !password) {
+        return res.status(400).json({ error: 'Name, Student ID, and Password are required' });
+    }
+    
+    const sql = `INSERT INTO students (id, name, studentId, password, email, phone, department, semester) 
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+    const id = 'STU-' + Date.now();
+    const params = [id, name, studentId.toUpperCase(), password, email || '', phone || '', department || '', semester || ''];
+    
+    db.run(sql, params, function(err) {
+        if (err) {
+            if (err.message.includes('UNIQUE constraint failed')) {
+                return res.status(400).json({ error: 'Student ID already registered' });
+            }
+            return res.status(400).json({ error: err.message });
+        }
+        res.status(201).json({
+            message: 'registration_success',
+            data: { id, studentId: studentId.toUpperCase(), name }
+        });
+    });
+});
+
+// API: Login student
+app.post('/api/students/login', (req, res) => {
+    const { studentId, password } = req.body;
+    
+    if (!studentId || !password) {
+        return res.status(400).json({ error: 'Student ID and Password are required' });
+    }
+    
+    const sql = `SELECT * FROM students WHERE studentId = ? AND password = ?`;
+    
+    db.get(sql, [studentId.toUpperCase(), password], (err, row) => {
+        if (err) {
+            return res.status(400).json({ error: err.message });
+        }
+        
+        if (!row) {
+            return res.status(401).json({ error: 'Invalid Student ID or Password' });
+        }
+        
+        // Update last login time
+        const updateSql = `UPDATE students SET lastLogin = CURRENT_TIMESTAMP WHERE id = ?`;
+        db.run(updateSql, [row.id]);
+        
+        res.json({
+            message: 'login_success',
+            data: {
+                id: row.id,
+                name: row.name,
+                studentId: row.studentId,
+                email: row.email,
+                phone: row.phone,
+                department: row.department,
+                semester: row.semester,
+                role: 'student'
+            }
+        });
+    });
+});
+
+// API: Get student profile
+app.get('/api/students/:id', (req, res) => {
+    const sql = `SELECT id, name, studentId, email, phone, department, semester, createdAt, lastLogin FROM students WHERE id = ?`;
+    
+    db.get(sql, [req.params.id], (err, row) => {
+        if (err) {
+            return res.status(400).json({ error: err.message });
+        }
+        
+        if (!row) {
+            return res.status(404).json({ error: 'Student not found' });
+        }
+        
+        res.json({ message: 'success', data: row });
+    });
+});
+
+// API: Update student profile
+app.patch('/api/students/:id', (req, res) => {
+    const { email, phone, department, semester } = req.body;
+    
+    let setClauses = [];
+    let params = [];
+    
+    if (email !== undefined) { setClauses.push("email = ?"); params.push(email); }
+    if (phone !== undefined) { setClauses.push("phone = ?"); params.push(phone); }
+    if (department !== undefined) { setClauses.push("department = ?"); params.push(department); }
+    if (semester !== undefined) { setClauses.push("semester = ?"); params.push(semester); }
+    
+    if (setClauses.length === 0) {
+        return res.status(400).json({ error: "No update fields provided." });
+    }
+    
+    params.push(req.params.id);
+    const sql = `UPDATE students SET ${setClauses.join(", ")} WHERE id = ?`;
+    
+    db.run(sql, params, function(err) {
+        if (err) {
+            return res.status(400).json({ error: err.message });
+        }
+        res.json({
+            message: 'success',
+            changes: this.changes
+        });
+    });
+});
+
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });

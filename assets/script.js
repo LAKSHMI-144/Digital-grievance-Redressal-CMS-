@@ -38,22 +38,117 @@ const checkAuth = (roleRequired) => {
 };
 
 // ==========================================
+<<<<<<< HEAD
 // AUTHENTICATION LOGIC (MOCK)
 // ==========================================
 const handleLogin = (formId, role, redirectUrl) => {
+=======
+// EMAIL NOTIFICATION SERVICE (EmailJS)
+// ==========================================
+// To make this work instantly:
+// 1. Go to https://www.emailjs.com/ and sign up for free.
+// 2. Add a new Email Service (Gmail)
+// 3. Create an Email Template with:
+//    Subject: Your Verification Code
+//    Body: Your login OTP is: {{otp}}
+// 4. Paste your 3 keys below!
+
+window.sendOTPToEmail = async (userEmail, otpCode) => {
+    // 🔴 CONFIGURATION: PASTE YOUR EMAILJS KEYS HERE 🔴
+    const serviceID = "YOUR_SERVICE_ID_HERE"; 
+    const templateID = "YOUR_TEMPLATE_ID_HERE";
+    const publicKey = "YOUR_PUBLIC_KEY_HERE";
+
+    if(serviceID === "YOUR_SERVICE_ID_HERE") {
+        alert(`[MOCK 2FA SYSTEM] Your verification code is: ${otpCode}`);
+        return;
+    }
+
+    try {
+        await fetch("https://api.emailjs.com/api/v1.0/email/send", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                service_id: serviceID,
+                template_id: templateID,
+                user_id: publicKey,
+                template_params: {
+                    to_email: userEmail,
+                    otp: otpCode
+                }
+            })
+        });
+        console.log(`Real OTP successfully sent to ${userEmail}!`);
+    } catch (error) {
+        console.error("Failed to send OTP email", error);
+        alert(`Failed to send email. Fallback OTP display: ${otpCode}`);
+    }
+};
+
+// ==========================================
+// AUTHENTICATION LOGIC (MOCK)
+// ==========================================
+const handleLogin = (formId, role, redirectUrl, requiresOtp = false) => {
+>>>>>>> 651a1452676b957ae9eb4aa868234c1a726f14fc
     const form = document.getElementById(formId);
     if (!form) return;
 
     form.addEventListener('submit', (e) => {
         e.preventDefault();
+<<<<<<< HEAD
         const email = document.getElementById('email').value;
         const btn = form.querySelector('button[type="submit"]');
         const origText = btn.innerHTML;
         
+=======
+        
+        // Support both old "email" login and new "Student ID" login
+        const emailEl = document.getElementById('email');
+        const studentIdEl = document.getElementById('studentId');
+        const identifier = studentIdEl ? studentIdEl.value.toUpperCase() : (emailEl ? emailEl.value : 'user');
+        
+        const passwordInput = form.querySelector('input[type="password"]');
+        const password = passwordInput ? passwordInput.value : '';
+
+        const btn = form.querySelector('button[type="submit"]');
+        const origText = btn.innerHTML;
+        
+        // --- HARDCODED ROLE VALIDATION ---
+        if (role === 'admin') {
+            if (identifier !== 'manyahcmce@gmail.com') {
+                alert("Access Denied: Unrecognized Admin Email.");
+                return;
+            }
+            if (password !== '241424') {
+                alert("Access Denied: Incorrect Password.");
+                return;
+            }
+        }
+        if (role === 'department') {
+            const dept = document.getElementById('deptSelect')?.value;
+            let expectedEmail = '';
+            if (dept === 'Academic') expectedEmail = 'llakshmir895@gmail.com';
+            else if (dept === 'Hostel') expectedEmail = 'nishashankarppa2005@gmail.com';
+            else if (dept === 'Infrastructure') expectedEmail = 'preranagowda454@gmail.com';
+            else if (dept === 'Maintenance') expectedEmail = 'manyahcmce@gmail.com';
+
+            if (identifier !== expectedEmail) {
+                alert(`Access Denied: Unrecognized Email for ${dept} Unit.`);
+                return;
+            }
+            if (password !== '241424') {
+                alert("Access Denied: Incorrect Password.");
+                return;
+            }
+        }
+        // ---------------------------------
+
+>>>>>>> 651a1452676b957ae9eb4aa868234c1a726f14fc
         btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Authenticating...`;
         btn.disabled = true;
 
         setTimeout(() => {
+<<<<<<< HEAD
             // Mock Login
             localStorage.setItem('user', JSON.stringify({
                 email: email,
@@ -62,6 +157,41 @@ const handleLogin = (formId, role, redirectUrl) => {
                 department: role === 'department' ? document.getElementById('deptSelect')?.value || 'Maintenance' : null
             }));
             window.location.href = redirectUrl;
+=======
+            if (requiresOtp) {
+                // Generate a 6-digit mock OTP
+                const otp = Math.floor(100000 + Math.random() * 900000).toString();
+                // 60-second expiration timestamp
+                const expiry = new Date().getTime() + 60000;
+                
+                // Save temp auth session to verify later
+                const tempAuth = {
+                    identifier: identifier,
+                    name: identifier.split('@')[0],
+                    role: role,
+                    department: role === 'department' ? document.getElementById('deptSelect')?.value || 'Maintenance' : null,
+                    redirectUrl: redirectUrl,
+                    otp: otp,
+                    expiry: expiry
+                };
+                localStorage.setItem('temp_auth', JSON.stringify(tempAuth));
+                
+                // Send the real email instead of just mocking it!
+                window.sendOTPToEmail(identifier, otp);
+                
+                window.location.href = '../pages/otp-verification.html';
+                
+            } else {
+                localStorage.setItem('user', JSON.stringify({
+                    email: role === 'student' ? 'student@university.edu' : identifier,
+                    studentId: identifier,
+                    name: role === 'student' ? 'Student' : identifier.split('@')[0],
+                    role: role,
+                    department: role === 'department' ? document.getElementById('deptSelect')?.value || 'Maintenance' : null
+                }));
+                window.location.href = redirectUrl;
+            }
+>>>>>>> 651a1452676b957ae9eb4aa868234c1a726f14fc
         }, 1000);
     });
 };
@@ -130,6 +260,7 @@ if (submitForm) {
 // 2. Student Dashboard List
 if (document.getElementById('studentDashboardList')) {
     const user = checkAuth('student');
+<<<<<<< HEAD
     document.getElementById('studentNameDisplay').innerText = user.name;
 
     const renderStudentList = () => {
@@ -154,6 +285,53 @@ if (document.getElementById('studentDashboardList')) {
         });
     };
     renderStudentList();
+=======
+    if(user) {
+        document.getElementById('studentNameDisplay').innerText = user.name;
+    
+        const renderStudentList = () => {
+            const list = document.getElementById('studentDashboardList');
+            const inboxContainer = document.querySelector('.glass-card p.text-orange-400').parentElement.parentElement;
+            
+            // Handle both older mock data (studentEmail) and newer root-script data (email)
+            const allData = JSON.parse(localStorage.getItem('sys_complaints') || '[]');
+            const data = allData.filter(c => c.email === user.email || c.studentEmail === user.email || c.email === 'student@university.edu');
+            
+            list.innerHTML = '';
+            let newNotificationsHTML = '';
+            
+            if(data.length === 0) {
+                list.innerHTML = `<p class="text-slate-500 text-sm">No complaints filed yet.</p>`;
+                return;
+            }
+    
+            data.reverse().forEach(c => {
+                list.innerHTML += `
+                <div class="glass-panel p-4 rounded-xl flex flex-col hover:bg-white/5 transition-colors cursor-pointer mb-3" onclick="window.location.href='track-complaint.html?id=${c.id}'">
+                    <div class="flex items-center justify-between">
+                        <h4 class="font-bold text-slate-200">${c.title || 'Untitled Grievance'}</h4>
+                        <div>${getStatusBadge(c.status)}</div>
+                    </div>
+                    <p class="text-xs text-slate-500 font-mono mt-2">${c.id} • ${c.createdAt ? new Date(c.createdAt).toLocaleDateString() : new Date().toLocaleDateString()}</p>
+                </div>`;
+                
+                if(c.status === 'Resolved' || c.status === 'In Progress') {
+                    newNotificationsHTML += `
+                    <div class="p-4 bg-white/5 border border-white/10 rounded-xl text-sm mt-3">
+                        <p class="text-xs text-indigo-400 font-bold mb-1">UPDATE ON ${c.id}</p>
+                        <p class="text-slate-300">Your grievance status has been updated to <span class="text-white font-bold">${c.status}</span>.</p>
+                        ${c.departmentResponse ? `<p class="mt-2 text-xs text-slate-400 italic bg-black/20 p-2 rounded">"${c.departmentResponse}"</p>` : ''}
+                    </div>`;
+                }
+            });
+            
+            if(newNotificationsHTML) {
+                inboxContainer.innerHTML += newNotificationsHTML;
+            }
+        };
+        renderStudentList();
+    }
+>>>>>>> 651a1452676b957ae9eb4aa868234c1a726f14fc
 }
 
 // ==========================================

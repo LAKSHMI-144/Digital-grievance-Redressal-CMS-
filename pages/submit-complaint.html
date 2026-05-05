@@ -6,7 +6,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../assets/styles.css">
+    <link rel="stylesheet" href="../styles.css">
 </head>
 <body class="bg-slate-900 text-white font-inter min-h-screen flex flex-col selection:bg-indigo-500/30">
     <nav class="p-6">
@@ -38,8 +38,21 @@
                 </div>
 
                 <div>
-                    <label class="text-xs font-semibold text-slate-300 uppercase tracking-wide">Description</label>
-                    <textarea id="description" required rows="4" class="w-full mt-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/50 resize-none" placeholder="Provide detailed information..."></textarea>
+                    <div class="flex justify-between items-end mb-1 mt-1">
+                        <label class="text-xs font-semibold text-slate-300 uppercase tracking-wide">Description</label>
+                        <button type="button" id="aiImproveBtn" class="text-xs flex items-center gap-1 bg-indigo-500/20 text-indigo-400 hover:bg-indigo-500/30 px-3 py-1.5 rounded-lg border border-indigo-500/30 transition-colors font-bold"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Enhance</button>
+                    </div>
+                    <textarea id="description" required rows="4" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/50 resize-none" placeholder="Provide detailed information..."></textarea>
+                    
+                    <!-- AI Suggestion Box -->
+                    <div id="aiSuggestionBox" class="hidden mt-3 p-4 bg-indigo-900/40 border border-indigo-500/30 rounded-xl relative overflow-hidden">
+                        <div class="absolute inset-0 bg-indigo-500/10 animate-pulse pointer-events-none"></div>
+                        <div class="flex items-center gap-2 mb-2 text-indigo-300 text-sm font-bold relative z-10">
+                            <i class="fa-solid fa-robot"></i> AI Suggestion:
+                        </div>
+                        <p id="aiSuggestedText" class="text-sm text-slate-300 italic mb-3 relative z-10"></p>
+                        <button type="button" id="applyAiText" class="text-xs bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-1.5 rounded-lg transition-colors font-bold relative z-10">Apply Suggestion</button>
+                    </div>
                 </div>
 
                 <div>
@@ -66,6 +79,6 @@
         </div>
     </main>
 
-    <script src="../assets/script.js"></script>
+    <script src="../script.js"></script>
 </body>
 </html>

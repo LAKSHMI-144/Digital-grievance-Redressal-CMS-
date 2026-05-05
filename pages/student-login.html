@@ -24,8 +24,8 @@
 
         <form id="studentLoginForm" class="space-y-5">
             <div>
-                <label class="text-xs font-semibold text-slate-300 uppercase tracking-wide">University Email</label>
-                <input type="email" id="email" required class="w-full mt-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/50 transition-colors" placeholder="student@university.edu">
+                <label class="text-xs font-semibold text-slate-300 uppercase tracking-wide">Student ID</label>
+                <input type="text" id="studentId" required pattern="4MC23CS(00[1-9]|0[1-9][0-9]|1[0-9]{2}|200)" title="Format: 4MC23CS001 to 4MC23CS200" class="w-full mt-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/50 transition-colors uppercase" placeholder="e.g. 4MC23CS073">
             </div>
             <div>
                 <label class="text-xs font-semibold text-slate-300 uppercase tracking-wide">Password</label>
@@ -37,14 +37,61 @@
 
         <div class="mt-8 text-center border-t border-white/10 pt-6">
             <p class="text-xs text-slate-400 mb-4">Don't have an account?</p>
-            <button class="px-6 py-2 glass-panel hover:bg-white/10 rounded-lg text-sm font-bold transition-colors w-full">Register Account</button>
+            <a href="student-register.html" class="block w-full text-center px-6 py-2 glass-panel hover:bg-white/10 rounded-lg text-sm font-bold transition-colors">Register Account</a>
             <a href="../index.html" class="inline-block mt-4 text-xs text-indigo-400 hover:text-indigo-300">Return Home</a>
         </div>
     </div>
 
     <script src="../assets/script.js"></script>
     <script>
-        handleLogin('studentLoginForm', 'student', 'student-dashboard.html');
+        document.getElementById('studentLoginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalText = btn.innerText;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Logging in...`;
+            btn.disabled = true;
+
+            const studentId = document.getElementById('studentId').value.trim();
+            const password = document.querySelector('input[type="password"]').value;
+
+            if (!studentId || !password) {
+                alert('Please enter both Student ID and Password');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:3000/api/students/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        studentId,
+                        password
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.message === 'login_success') {
+                    // Store user data in localStorage
+                    localStorage.setItem('user', JSON.stringify(data.data));
+                    alert('Login successful! Welcome ' + data.data.name);
+                    window.location.href = 'student-dashboard.html';
+                } else {
+                    alert('Login failed: ' + (data.error || 'Invalid credentials'));
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('Error during login. Please check if the server is running on http://localhost:3000');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        });
     </script>
 </body>
 </html>
