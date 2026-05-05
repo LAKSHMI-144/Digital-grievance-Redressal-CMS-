@@ -29,11 +29,28 @@ const db = new sqlite3.Database(dbPath, (err) => {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             student_id TEXT UNIQUE,
             name TEXT,
+            email TEXT,
+            department TEXT,
             password TEXT
         )`, (err) => {
-            if (err) {
-                console.error('Error creating students table', err.message);
-            }
+            if (err) console.error('Error creating students table', err.message);
+        });
+
+        db.run(`CREATE TABLE IF NOT EXISTS admins (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE,
+            password TEXT,
+            role TEXT DEFAULT 'admin'
+        )`, (err) => {
+            if (err) console.error('Error creating admins table', err.message);
+        });
+
+        db.run(`CREATE TABLE IF NOT EXISTS departments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT UNIQUE,
+            head_of_department TEXT
+        )`, (err) => {
+            if (err) console.error('Error creating departments table', err.message);
         });
     }
 });

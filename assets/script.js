@@ -103,28 +103,35 @@ const handleLogin = (formId, role, redirectUrl, requiresOtp = false) => {
         
         // --- HARDCODED ROLE VALIDATION ---
         if (role === 'admin') {
-            if (identifier !== 'manyahcmce@gmail.com') {
+            const idenClean = identifier.trim().toLowerCase();
+            if (idenClean !== 'manyahcmce@gmail.com') {
                 alert("Access Denied: Unrecognized Admin Email.");
                 return;
             }
-            if (password !== '241424') {
+            if (password.trim() !== '241424') {
                 alert("Access Denied: Incorrect Password.");
                 return;
             }
         }
         if (role === 'department') {
-            const dept = document.getElementById('deptSelect')?.value;
-            let expectedEmail = '';
-            if (dept === 'Academic') expectedEmail = 'llakshmir895@gmail.com';
-            else if (dept === 'Hostel') expectedEmail = 'nishashankarppa2005@gmail.com';
-            else if (dept === 'Infrastructure') expectedEmail = 'preranagowda454@gmail.com';
-            else if (dept === 'Maintenance') expectedEmail = 'manyahcmce@gmail.com';
+            const emailClean = identifier.trim().toLowerCase();
+            const deptMapping = {
+                'lakshmir895@gmail.com': 'Academic',
+                'llakshmir895@gmail.com': 'Academic',
+                'lakshmir859@gmail.com': 'Academic',
+                'llakshmir859@gmail.com': 'Academic',
+                'nishashankarppa2005@gmail.com': 'Hostel',
+                'preranagowda454@gmail.com': 'Infrastructure',
+                'manyahcmce@gmail.com': 'Maintenance'
+            };
+            
+            window.inferredDept = deptMapping[emailClean];
 
-            if (identifier !== expectedEmail) {
-                alert(`Access Denied: Unrecognized Email for ${dept} Unit.`);
+            if (!window.inferredDept) {
+                alert(`Access Denied: Unrecognized Department Email.`);
                 return;
             }
-            if (password !== '241424') {
+            if (password.trim() !== '241424') {
                 alert("Access Denied: Incorrect Password.");
                 return;
             }
@@ -177,7 +184,7 @@ const handleLogin = (formId, role, redirectUrl, requiresOtp = false) => {
                     identifier: identifier,
                     name: identifier.split('@')[0],
                     role: role,
-                    department: role === 'department' ? document.getElementById('deptSelect')?.value || 'Maintenance' : null,
+                    department: role === 'department' ? (window.inferredDept || 'Maintenance') : null,
                     redirectUrl: redirectUrl,
                     otp: otp,
                     expiry: expiry
@@ -195,7 +202,7 @@ const handleLogin = (formId, role, redirectUrl, requiresOtp = false) => {
                     studentId: identifier,
                     name: role === 'student' ? 'Student' : identifier.split('@')[0],
                     role: role,
-                    department: role === 'department' ? document.getElementById('deptSelect')?.value || 'Maintenance' : null
+                    department: role === 'department' ? (window.inferredDept || 'Maintenance') : null
                 }));
                 window.location.href = redirectUrl;
             }
@@ -247,7 +254,23 @@ if (submitForm) {
         };
 
         try {
-            // Fallback to local array since our backend might not be perfectly seeded for this schema yet natively
+            // Back-end integration! Feed the real database
+            await fetch('/api/complaints', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id: payload.id,
+                    name: payload.studentName,
+                    email: payload.studentEmail,
+                    category: payload.category,
+                    title: payload.title,
+                    description: payload.description,
+                    image: payload.image,
+                    status: payload.status
+                })
+            });
+
+            // ALSO save to local array since some dashboard table lists rely on it currently
             let local = JSON.parse(localStorage.getItem('sys_complaints') || '[]');
             local.push(payload);
             localStorage.setItem('sys_complaints', JSON.stringify(local));
@@ -256,7 +279,8 @@ if (submitForm) {
             document.getElementById('successState').classList.remove('hidden');
             document.getElementById('displayId').innerText = newID;
         } catch(err) {
-            console.error(err);
+            console.error("Submission error:", err);
+            alert("Failed to submit to server! Please check if backend is running.");
         } finally {
             btn.innerHTML = orig;
             btn.disabled = false;
@@ -270,13 +294,23 @@ if (document.getElementById('studentDashboardList')) {
     if(user) {
         document.getElementById('studentNameDisplay').innerText = user.name;
     
-        const renderStudentList = () => {
+        const renderStudentList = async () => {
             const list = document.getElementById('studentDashboardList');
             const inboxContainer = document.querySelector('.glass-card p.text-orange-400').parentElement.parentElement;
             
             // Handle both older mock data (studentEmail) and newer root-script data (email)
-            const allData = JSON.parse(localStorage.getItem('sys_complaints') || '[]');
-            const data = allData.filter(c => c.email === user.email || c.studentEmail === user.email || c.email === 'student@university.edu');
+            
+            let data = [];
+            try {
+                const res = await fetch('/api/complaints');
+                const json = await res.json();
+                const allData = json.data || [];
+                data = allData.filter(c => c.email === user.email || c.studentEmail === user.email || c.name === user.name || c.email === 'student@university.edu');
+            } catch(e) {
+                const allData = JSON.parse(localStorage.getItem('sys_complaints') || '[]');
+                data = allData.filter(c => c.email === user.email || c.studentEmail === user.email || c.name === user.name || c.email === 'student@university.edu');
+            }
+
             
             list.innerHTML = '';
             let newNotificationsHTML = '';
@@ -322,18 +356,27 @@ if(document.getElementById('adminDashboardList')) {
 
     window.assignedDataId = null;
 
-    const renderAdminList = () => {
-        const list = document.getElementById('adminDashboardList');
-        const filter = document.getElementById('adminFilter').value;
-        const data = JSON.parse(localStorage.getItem('sys_complaints') || '[]');
-        
-        // Stats update
-        document.getElementById('statTotal').innerText = data.length;
-        document.getElementById('statUnassigned').innerText = data.filter(c => !c.assignedDepartment).length;
-        document.getElementById('statResolved').innerText = data.filter(c => c.status === 'Resolved').length;
+    const renderAdminList = async () => {
+    const list = document.getElementById('adminDashboardList');
+    const filter = document.getElementById('adminFilter').value;
+    
+    let data = [];
+    try {
+        const response = await fetch('/api/complaints');
+        const json = await response.json();
+        data = json.data || [];
+    } catch (e) {
+        console.error('API fetch failed, falling back to local storage', e);
+        data = JSON.parse(localStorage.getItem('sys_complaints') || '[]');
+    }
+    
+    // Stats update
+    document.getElementById('statTotal').innerText = data.length;
+    document.getElementById('statUnassigned').innerText = data.filter(c => !c.assignedDepartment).length;
+    document.getElementById('statResolved').innerText = data.filter(c => c.status === 'Resolved').length;
 
-        list.innerHTML = '';
-        const filtered = data.filter(c => filter === 'All' || c.category === filter);
+    list.innerHTML = '';
+    const filtered = data.filter(c => filter === 'All' || c.category === filter);
 
         if(filtered.length === 0) {
             list.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-500">No grievances found.</td></tr>`;
@@ -344,7 +387,7 @@ if(document.getElementById('adminDashboardList')) {
             list.innerHTML += `
             <tr class="hover:bg-white/5 border-b border-white/5 transition-colors">
                 <td class="p-4 font-mono text-indigo-400 text-sm">${c.id}</td>
-                <td class="p-4"><p class="font-bold text-slate-200 text-sm">${c.studentName}</p></td>
+                <td class="p-4"><p class="font-bold text-slate-200 text-sm">${c.name || c.studentName || 'Anonymous'}</p></td>
                 <td class="p-4 text-sm text-slate-300 w-48 truncate">${c.title}</td>
                 <td class="p-4 text-sm">${c.category}</td>
                 <td class="p-4">${getStatusBadge(c.status)}</td>
@@ -357,9 +400,16 @@ if(document.getElementById('adminDashboardList')) {
         });
     };
 
-    window.openAdminModal = (id) => {
-        const data = JSON.parse(localStorage.getItem('sys_complaints') || '[]');
-        const c = data.find(x => x.id === id);
+    window.openAdminModal = async (id) => {
+        let c;
+        try {
+            const res = await fetch(`/api/complaints/${id}`);
+            const json = await res.json();
+            c = json.data;
+        } catch(e) {
+            const data = JSON.parse(localStorage.getItem('sys_complaints') || '[]');
+            c = data.find(x => x.id === id);
+        }
         if(!c) return;
         
         window.assignedDataId = id;
@@ -374,16 +424,24 @@ if(document.getElementById('adminDashboardList')) {
 
     window.closeAdminModal = () => document.getElementById('adminModal').classList.add('hidden');
 
-    document.getElementById('modalAssignBtn').addEventListener('click', () => {
+    document.getElementById('modalAssignBtn').addEventListener('click', async () => {
         const dept = document.getElementById('modalDeptSelect').value;
         if(!dept) return alert("Select a department!");
         
-        let data = JSON.parse(localStorage.getItem('sys_complaints') || '[]');
-        let index = data.findIndex(x => x.id === window.assignedDataId);
-        if(index > -1) {
-            data[index].assignedDepartment = dept;
-            if(data[index].status === 'Pending') data[index].status = 'Assigned';
-            localStorage.setItem('sys_complaints', JSON.stringify(data));
+        try {
+            await fetch(`/api/complaints/${window.assignedDataId}/status`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ assignedDepartment: dept, status: 'Assigned' })
+            });
+        } catch (e) {
+            let data = JSON.parse(localStorage.getItem('sys_complaints') || '[]');
+            let index = data.findIndex(x => x.id === window.assignedDataId);
+            if(index > -1) {
+                data[index].assignedDepartment = dept;
+                if(data[index].status === 'Pending') data[index].status = 'Assigned';
+                localStorage.setItem('sys_complaints', JSON.stringify(data));
+            }
         }
         closeAdminModal();
         renderAdminList();
@@ -402,9 +460,16 @@ if(document.getElementById('deptDashboardList')) {
 
     window.deptDataId = null;
 
-    const renderDeptList = () => {
+    const renderDeptList = async () => {
         const list = document.getElementById('deptDashboardList');
-        const data = JSON.parse(localStorage.getItem('sys_complaints') || '[]').filter(c => c.assignedDepartment === user.department);
+        let data = [];
+        try {
+            const res = await fetch('/api/complaints');
+            const json = await res.json();
+            data = (json.data || []).filter(c => c.assignedDepartment === user.department);
+        } catch(e) {
+            data = JSON.parse(localStorage.getItem('sys_complaints') || '[]').filter(c => c.assignedDepartment === user.department);
+        }
         
         document.getElementById('statAssigned').innerText = data.length;
         document.getElementById('statProgress').innerText = data.filter(c => c.status === 'In Progress').length;
@@ -430,9 +495,16 @@ if(document.getElementById('deptDashboardList')) {
         });
     };
 
-    window.openDeptModal = (id) => {
-        const data = JSON.parse(localStorage.getItem('sys_complaints') || '[]');
-        const c = data.find(x => x.id === id);
+    window.openDeptModal = async (id) => {
+        let c;
+        try {
+            const res = await fetch(`/api/complaints/${id}`);
+            const json = await res.json();
+            c = json.data;
+        } catch(e) {
+            const data = JSON.parse(localStorage.getItem('sys_complaints') || '[]');
+            c = data.find(x => x.id === id);
+        }
         if(!c) return;
         
         window.deptDataId = id;
@@ -447,19 +519,28 @@ if(document.getElementById('deptDashboardList')) {
 
     window.closeDeptModal = () => document.getElementById('deptModal').classList.add('hidden');
 
-    document.getElementById('modalUpdateBtn').addEventListener('click', () => {
+    document.getElementById('modalUpdateBtn').addEventListener('click', async () => {
         const status = document.getElementById('modalStatusSelect').value;
         const note = document.getElementById('modalResponse').value;
         
-        let data = JSON.parse(localStorage.getItem('sys_complaints') || '[]');
-        let index = data.findIndex(x => x.id === window.deptDataId);
-        if(index > -1) {
-            data[index].status = status;
-            if(note.trim()) {
-                data[index].departmentResponse = note;
-            }
-            localStorage.setItem('sys_complaints', JSON.stringify(data));
+        try {
+            await fetch(`/api/complaints/${window.deptDataId}/status`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: status, departmentResponse: note })
+            });
             alert(`Status updated and Student notified: ${status}`);
+        } catch (e) {
+            let data = JSON.parse(localStorage.getItem('sys_complaints') || '[]');
+            let index = data.findIndex(x => x.id === window.deptDataId);
+            if(index > -1) {
+                data[index].status = status;
+                if(note.trim()) {
+                    data[index].departmentResponse = note;
+                }
+                localStorage.setItem('sys_complaints', JSON.stringify(data));
+                alert(`Status updated and Student notified: ${status}`);
+            }
         }
         closeDeptModal();
         renderDeptList();
@@ -467,3 +548,40 @@ if(document.getElementById('deptDashboardList')) {
 
     renderDeptList();
 }
+
+// ==========================================
+// TRACKING LOGIC
+// ==========================================
+window.trackStatus = async () => {
+    const idInput = document.getElementById('trackID');
+    if (!idInput) return;
+    const id = idInput.value.trim().toUpperCase();
+    if (!id) {
+        alert("Please enter a valid Grievance ID");
+        return;
+    }
+    
+    document.getElementById('statusBadge').innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i>`;
+    document.getElementById('statusResult').classList.remove('hidden');
+
+    try {
+        const res = await fetch(`/api/complaints/${id}`);
+        const data = await res.json();
+        
+        if (res.status === 404 || !data.data) {
+            document.getElementById('statusBadge').innerHTML = `<span class="text-red-400">NOT FOUND</span>`;
+            
+            // Fallback checking local array just in case it was created offline
+            let local = JSON.parse(localStorage.getItem('sys_complaints') || '[]');
+            let lc = local.find(x => x.id === id);
+            if(lc) document.getElementById('statusBadge').innerHTML = getStatusBadge(lc.status);
+            
+            return;
+        }
+        
+        const c = data.data;
+        document.getElementById('statusBadge').innerHTML = getStatusBadge(c.status);
+    } catch(err) {
+        document.getElementById('statusBadge').innerHTML = `<span class="text-red-400">ERROR</span>`;
+    }
+};
