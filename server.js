@@ -23,7 +23,7 @@ app.post('/api/complaints', (req, res) => {
     }
     
     const sql = `INSERT INTO complaints (id, name, email, studentId, category, department, priority, title, description, image, status, assignedDepartment, departmentResponse) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-    const params = [id, name, email || '', studentId || '', category, category, priority || 'Medium', title, description || '', image || '', status || 'Pending', null, null];
+    const params = [id, name, email || '', studentId || '', category, category, priority || 'Medium', title, description || '', image || '', status || 'Pending', category, null];
     
     db.run(sql, params, function(err) {
         if (err) {
@@ -32,7 +32,7 @@ app.post('/api/complaints', (req, res) => {
         }
         res.json({
             message: 'success',
-            data: { id, name, category, department, title, status }
+            data: { id, name, category, department, assignedDepartment: category, title, status }
         });
     });
 });

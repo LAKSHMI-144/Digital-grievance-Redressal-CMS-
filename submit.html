@@ -37,8 +37,19 @@
                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Category <span class="text-red-500">*</span></label>
                     <!-- Make sure text color targets options as well so they are visible -->
                     <select id="category" class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-medium appearance-none">
-                        <option value="Academic">Academic</option>
-                        <option value="Non-Academic">Non-Academic</option>
+                        <option value="">Select a category...</option>
+                        <optgroup label="Academic Departments">
+                            <option value="CSE">CSE Department</option>
+                            <option value="ISE">ISE Department</option>
+                            <option value="AIML">AI & ML Department</option>
+                        </optgroup>
+                        <optgroup label="Other Categories">
+                            <option value="Hostel">Hostel/Accommodation</option>
+                            <option value="Infrastructure">Infrastructure</option>
+                            <option value="Maintenance">Maintenance</option>
+                            <option value="AdminBlock">Admin Block</option>
+                            <option value="Other">Other</option>
+                        </optgroup>
                     </select>
                 </div>
             </div>
@@ -46,6 +57,15 @@
             <div id="departmentContainer" class="hidden">
                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Department <span class="text-red-500">*</span></label>
                 <select id="department" class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-medium appearance-none">
+                    <option value="">Select a department...</option>
+                    <option value="CSE">CSE Department</option>
+                    <option value="ISE">ISE Department</option>
+                    <option value="AIML">AI & ML Department</option>
+                    <option value="Hostel">Hostel</option>
+                    <option value="Infrastructure">Infrastructure</option>
+                    <option value="Maintenance">Maintenance</option>
+                    <option value="AdminBlock">Admin Block</option>
+                    <option value="Other">Other</option>
                 </select>
             </div>
             </div>

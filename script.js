@@ -107,11 +107,14 @@ if (submitForm) {
         const titleEl = document.getElementById('title');
         const descEl = document.getElementById('description') || document.getElementById('desc');
 
+        const category = document.getElementById('category') ? document.getElementById('category').value : "Other";
         const payload = {
             id: newID,
             name: nameEl ? nameEl.value : (userObj.name || "Student"),
             email: emailEl ? emailEl.value : (userObj.email || "student@university.edu"),
-            category: document.getElementById('category') ? document.getElementById('category').value : "Other",
+            category: category,
+            department: category,
+            assignedDepartment: category,
             title: titleEl ? titleEl.value : "Grievance Report",
             description: descEl ? descEl.value : "",
             image: base64Image,

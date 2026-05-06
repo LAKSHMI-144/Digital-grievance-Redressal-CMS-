@@ -117,11 +117,11 @@ const handleLogin = (formId, role, redirectUrl, requiresOtp = false) => {
             const emailClean = identifier.trim().toLowerCase();
             const deptMapping = {
                 'lakshmir895@gmail.com': 'CSE',
-                'vandhuvora2005@gmail.com': 'ENML',
+                'vandhuvora2005@gmail.com': 'AIML',
                 'nisha.gowda2004@gmail.com': 'ISE',
                 'prayagowda2004@gmail.com': 'Hostel',
                 'manhc@gmail.com': 'Infrastructure',
-                'priya25gowda@gmail.com': 'Others',
+                'priya25gowda@gmail.com': 'AdminBlock',
                 'shreya@gmail.com': 'Maintenance'
             };
             

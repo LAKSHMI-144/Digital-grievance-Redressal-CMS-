@@ -131,8 +131,8 @@
                 }
 
                 grievances.forEach(g => {
-                    // Tally Departments
-                    let dept = g.department || 'Others';
+                    // Tally Departments and categories consistently
+                    let dept = g.department || g.category || 'Other';
                     catCounts[dept] = (catCounts[dept] || 0) + 1;
                     
                     // Tally Trends by Month
