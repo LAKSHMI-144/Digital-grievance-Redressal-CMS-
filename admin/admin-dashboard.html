@@ -7,21 +7,63 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../assets/styles.css">
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+        @keyframes blob {
+            0% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .animate-blob {
+            animation: blob 8s infinite ease-in-out;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
 </head>
-<body class="bg-slate-950 text-white font-inter h-screen overflow-hidden flex selection:bg-emerald-500/30">
+<body class="bg-[#0B0F19] text-white font-inter h-screen overflow-hidden flex selection:bg-emerald-500/30 relative">
+
+    <!-- Decorative glow effects -->
+    <div class="absolute top-[-10%] left-[-10%] w-[50rem] h-[50rem] rounded-full bg-emerald-600/10 blur-[150px] mix-blend-screen pointer-events-none z-0 animate-blob"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[50rem] h-[50rem] rounded-full bg-indigo-600/10 blur-[150px] mix-blend-screen pointer-events-none z-0 animate-blob" style="animation-delay: 3s;"></div>
 
     <!-- Sidebar -->
     <aside class="w-64 glass-panel border-r border-white/5 flex flex-col transition-all duration-300 relative z-20">
         <div class="p-6 border-b border-white/5 flex flex-col justify-center">
-            <div class="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-600/30 mb-3"><i class="fa-solid fa-shield-halved text-white"></i></div>
+            <div class="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-600/30 mb-3"><i class="fa-solid fa-user-shield text-white"></i></div>
             <h1 class="font-bold text-lg tracking-tight">Admin<span class="text-emerald-400">Pro</span></h1>
             <p class="text-xs text-slate-500 mt-1">Grievance Management</p>
         </div>
 
-        <nav class="flex-1 p-4 flex flex-col gap-2">
+        <nav class="flex-1 p-4 flex flex-col gap-2 relative z-10">
             <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-4 mb-2 pl-3">Menu</p>
-            <a href="#" class="flex items-center gap-3 px-3 py-2.5 bg-emerald-500/10 text-emerald-400 rounded-xl font-medium border border-emerald-500/20 transition-all">
+            <a href="admin-dashboard.html" class="flex items-center gap-3 px-3 py-2.5 bg-gradient-to-r from-emerald-500/20 to-emerald-500/5 text-emerald-400 rounded-xl font-medium border border-emerald-500/30 transition-all shadow-[0_0_15px_rgba(16,185,129,0.15)]">
                 <i class="fa-solid fa-border-all w-5 text-center"></i> Overview
+            </a>
+            <a href="reports.html" class="flex items-center gap-3 px-3 py-2.5 bg-transparent hover:bg-white/5 text-slate-400 hover:text-white rounded-xl font-medium border border-transparent transition-all group">
+                <i class="fa-solid fa-folder-open w-5 text-center group-hover:text-emerald-400 transition-colors"></i> Reports
+            </a>
+            <a href="analytics.html" class="flex items-center gap-3 px-3 py-2.5 bg-transparent hover:bg-white/5 text-slate-400 hover:text-white rounded-xl font-medium border border-transparent transition-all group">
+                <i class="fa-solid fa-chart-line w-5 text-center group-hover:text-emerald-400 transition-colors"></i> Analytics
             </a>
         </nav>
 
@@ -44,32 +86,58 @@
 
         <div class="flex-1 overflow-y-auto p-8 custom-scrollbar">
             <!-- Stats -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="glass-card rounded-2xl p-6 border-emerald-500/20">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 relative z-10">
+                <div class="glass-card rounded-2xl p-6 border border-white/5 hover:border-emerald-500/30 transition-all duration-300 shadow-xl group hover:-translate-y-1 bg-white/[0.02]">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 text-emerald-400 flex items-center justify-center group-hover:scale-110 transition-all duration-300 shadow-inner border border-emerald-500/20">
+                            <i class="fa-solid fa-list-check text-xl"></i>
+                        </div>
+                    </div>
                     <p class="text-sm text-slate-400 font-medium tracking-wide">Total Complaints</p>
-                    <h3 class="text-4xl font-bold mt-2" id="statTotal">--</h3>
+                    <h3 class="text-4xl font-extrabold mt-1 text-white group-hover:text-emerald-400 transition-colors drop-shadow-md" id="statTotal">--</h3>
                 </div>
-                <div class="glass-card rounded-2xl p-6 border-orange-500/20">
+                <div class="glass-card rounded-2xl p-6 border border-white/5 hover:border-orange-500/30 transition-all duration-300 shadow-xl group hover:-translate-y-1 bg-white/[0.02]">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500/20 to-orange-500/5 text-orange-400 flex items-center justify-center group-hover:scale-110 transition-all duration-300 shadow-inner border border-orange-500/20">
+                            <i class="fa-solid fa-hourglass-half text-xl"></i>
+                        </div>
+                    </div>
                     <p class="text-sm text-slate-400 font-medium tracking-wide">Unassigned</p>
-                    <h3 class="text-4xl font-bold mt-2 text-orange-400" id="statUnassigned">--</h3>
+                    <h3 class="text-4xl font-extrabold mt-1 text-white group-hover:text-orange-400 transition-colors drop-shadow-md" id="statUnassigned">--</h3>
                 </div>
-                <div class="glass-card rounded-2xl p-6 border-indigo-500/20">
+                <div class="glass-card rounded-2xl p-6 border border-white/5 hover:border-indigo-500/30 transition-all duration-300 shadow-xl group hover:-translate-y-1 bg-white/[0.02]">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500/20 to-indigo-500/5 text-indigo-400 flex items-center justify-center group-hover:scale-110 transition-all duration-300 shadow-inner border border-indigo-500/20">
+                            <i class="fa-solid fa-check-double text-xl"></i>
+                        </div>
+                    </div>
                     <p class="text-sm text-slate-400 font-medium tracking-wide">Resolved Fully</p>
-                    <h3 class="text-4xl font-bold mt-2 text-indigo-400" id="statResolved">--</h3>
+                    <h3 class="text-4xl font-extrabold mt-1 text-white group-hover:text-indigo-400 transition-colors drop-shadow-md" id="statResolved">--</h3>
                 </div>
             </div>
 
+            <!-- Grouped Department Stats -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 relative z-10" id="departmentStatsContainer">
+                <!-- Group stats injected by JS -->
+            </div>
+
             <!-- Main Table Panel -->
-            <div class="glass-card rounded-2xl border border-white/5 shadow-2xl flex flex-col overflow-hidden h-full min-h-[500px]">
-                <div class="p-6 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
-                    <h3 class="font-bold text-lg">All Student Grievances</h3>
-                    <div class="flex gap-4">
-                        <select id="adminFilter" class="bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:outline-none appearance-none">
-                            <option value="All">All Categories</option>
-                            <option value="Academic">Academic</option>
-                            <option value="Hostel">Hostel</option>
-                            <option value="Infrastructure">Infrastructure</option>
-                            <option value="Maintenance">Maintenance</option>
+            <div class="glass-card rounded-2xl border border-white/5 shadow-2xl flex flex-col overflow-hidden h-full min-h-[500px] relative z-10 bg-white/[0.01]">
+                <div class="p-6 border-b border-white/10 flex justify-between items-center bg-gradient-to-r from-white/[0.05] to-transparent">
+                    <h3 class="font-bold text-lg flex items-center gap-2"><i class="fa-solid fa-table-list text-emerald-500"></i> All Student Grievances</h3>
+                    <div class="flex gap-4 relative">
+                        <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400"><i class="fa-solid fa-caret-down text-xs"></i></div>
+                        <select id="adminFilter" class="bg-[#0B0F19]/80 border border-white/10 hover:border-emerald-500/50 rounded-xl pl-4 pr-10 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 appearance-none transition-all cursor-pointer font-medium shadow-lg">
+                            <option value="All">All Complaints</option>
+                            <option value="Category:Academic">Academic (All)</option>
+                            <option value="Dept:CSE">CSE</option>
+                            <option value="Dept:ISE">ISE</option>
+                            <option value="Dept:AIML">AIML / ENML</option>
+                            <option value="Category:Non-Academic">Non-Academic (All)</option>
+                            <option value="Dept:Hostel">Hostel</option>
+                            <option value="Dept:Infrastructure">Infrastructure</option>
+                            <option value="Dept:Maintenance">Maintenance</option>
+                            <option value="Dept:Others">Others</option>
                         </select>
                     </div>
                 </div>
@@ -80,6 +148,7 @@
                             <tr>
                                 <th class="p-4 text-xs font-semibold text-slate-400 uppercase">ID</th>
                                 <th class="p-4 text-xs font-semibold text-slate-400 uppercase">Student</th>
+                                <th class="p-4 text-xs font-semibold text-slate-400 uppercase">Priority</th>
                                 <th class="p-4 text-xs font-semibold text-slate-400 uppercase">Title</th>
                                 <th class="p-4 text-xs font-semibold text-slate-400 uppercase">Category</th>
                                 <th class="p-4 text-xs font-semibold text-slate-400 uppercase">Status</th>
@@ -144,3 +213,4 @@
     <script src="../assets/script.js"></script>
 </body>
 </html>
+

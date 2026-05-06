@@ -14,10 +14,18 @@ app.use(express.static(__dirname));
 
 // API: Create a new complaint
 app.post('/api/complaints', (req, res) => {
-    const { id, name, email, category, title, description, image, status } = req.body;
+    const { id, name, email, studentId, category, department, priority, title, description, image, status } = req.body;
     
-    const sql = `INSERT INTO complaints (id, name, email, category, title, description, image, status, assignedDepartment, departmentResponse) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-    const params = [id, name, email || '', category, title, description || '', image || '', status || 'Pending', null, null];
+    // Academic logic: Ensure department is valid
+    const validAcademic = ['CSE', 'ISE', 'AIML', 'ENML'];
+    if (category === 'Academic') {
+        if (!department || !validAcademic.includes(department.toUpperCase())) {
+            return res.status(400).json({ error: 'Academic complaints must specify a valid department (CSE, ISE, AIML/ENML)' });
+        }
+    }
+    
+    const sql = `INSERT INTO complaints (id, name, email, studentId, category, department, priority, title, description, image, status, assignedDepartment, departmentResponse) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    const params = [id, name, email || '', studentId || '', category, department || null, priority || 'Medium', title, description || '', image || '', status || 'Pending', null, null];
     
     db.run(sql, params, function(err) {
         if (err) {
@@ -26,7 +34,7 @@ app.post('/api/complaints', (req, res) => {
         }
         res.json({
             message: 'success',
-            data: { id, name, category, title, status }
+            data: { id, name, category, department, title, status }
         });
     });
 });
@@ -93,120 +101,50 @@ app.patch('/api/complaints/:id/status', (req, res) => {
     });
 });
 
-// ==========================================
-// STUDENT AUTHENTICATION ENDPOINTS
-// ==========================================
-
-// API: Register a new student
-app.post('/api/students/register', (req, res) => {
-    const { name, studentId, password, email, phone, department, semester } = req.body;
+// API: Student Register
+app.post('/api/register', (req, res) => {
+    const { studentId, name, password } = req.body;
     
-    if (!name || !studentId || !password) {
-        return res.status(400).json({ error: 'Name, Student ID, and Password are required' });
+    // Check if ID is provided
+    if (!studentId || !name || !password) {
+        return res.status(400).json({ error: "Missing required fields" });
     }
-    
-    const sql = `INSERT INTO students (id, name, studentId, password, email, phone, department, semester) 
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
-    const id = 'STU-' + Date.now();
-    const params = [id, name, studentId.toUpperCase(), password, email || '', phone || '', department || '', semester || ''];
-    
-    db.run(sql, params, function(err) {
+
+    const sql = `INSERT INTO students (studentId, name, password) VALUES (?, ?, ?)`;
+    console.log("Registering:", { studentId, name, password });
+    db.run(sql, [studentId.toUpperCase(), name, password], function(err) {
         if (err) {
-            if (err.message.includes('UNIQUE constraint failed')) {
-                return res.status(400).json({ error: 'Student ID already registered' });
+            console.error("SQLITE REGISTRATION ERROR:", err.message);
+            // Check for SQLite constraint violation (UNIQUE)
+            if (err.message.includes("UNIQUE constraint failed: students.studentId")) {
+                return res.status(400).json({ error: "Student ID already registered" });
             }
-            return res.status(400).json({ error: err.message });
+            return res.status(500).json({ error: "Database error during registration: " + err.message });
         }
-        res.status(201).json({
-            message: 'registration_success',
-            data: { id, studentId: studentId.toUpperCase(), name }
-        });
+        res.json({ message: "Registration successful" });
     });
 });
 
-// API: Login student
-app.post('/api/students/login', (req, res) => {
+// API: Student Login
+app.post('/api/login', (req, res) => {
     const { studentId, password } = req.body;
     
     if (!studentId || !password) {
-        return res.status(400).json({ error: 'Student ID and Password are required' });
+        return res.status(400).json({ error: "Missing required fields" });
     }
-    
+
     const sql = `SELECT * FROM students WHERE studentId = ? AND password = ?`;
-    
     db.get(sql, [studentId.toUpperCase(), password], (err, row) => {
         if (err) {
-            return res.status(400).json({ error: err.message });
+            return res.status(500).json({ error: "Database error during login" });
         }
-        
-        if (!row) {
-            return res.status(401).json({ error: 'Invalid Student ID or Password' });
+        if (row) {
+            // Found matched user credentials
+            res.json({ message: 'success', data: { studentId: row.studentId, name: row.name } });
+        } else {
+            // Invalid ID or Password
+            res.status(401).json({ error: 'Invalid login credentials' });
         }
-        
-        // Update last login time
-        const updateSql = `UPDATE students SET lastLogin = CURRENT_TIMESTAMP WHERE id = ?`;
-        db.run(updateSql, [row.id]);
-        
-        res.json({
-            message: 'login_success',
-            data: {
-                id: row.id,
-                name: row.name,
-                studentId: row.studentId,
-                email: row.email,
-                phone: row.phone,
-                department: row.department,
-                semester: row.semester,
-                role: 'student'
-            }
-        });
-    });
-});
-
-// API: Get student profile
-app.get('/api/students/:id', (req, res) => {
-    const sql = `SELECT id, name, studentId, email, phone, department, semester, createdAt, lastLogin FROM students WHERE id = ?`;
-    
-    db.get(sql, [req.params.id], (err, row) => {
-        if (err) {
-            return res.status(400).json({ error: err.message });
-        }
-        
-        if (!row) {
-            return res.status(404).json({ error: 'Student not found' });
-        }
-        
-        res.json({ message: 'success', data: row });
-    });
-});
-
-// API: Update student profile
-app.patch('/api/students/:id', (req, res) => {
-    const { email, phone, department, semester } = req.body;
-    
-    let setClauses = [];
-    let params = [];
-    
-    if (email !== undefined) { setClauses.push("email = ?"); params.push(email); }
-    if (phone !== undefined) { setClauses.push("phone = ?"); params.push(phone); }
-    if (department !== undefined) { setClauses.push("department = ?"); params.push(department); }
-    if (semester !== undefined) { setClauses.push("semester = ?"); params.push(semester); }
-    
-    if (setClauses.length === 0) {
-        return res.status(400).json({ error: "No update fields provided." });
-    }
-    
-    params.push(req.params.id);
-    const sql = `UPDATE students SET ${setClauses.join(", ")} WHERE id = ?`;
-    
-    db.run(sql, params, function(err) {
-        if (err) {
-            return res.status(400).json({ error: err.message });
-        }
-        res.json({
-            message: 'success',
-            changes: this.changes
-        });
     });
 });
 

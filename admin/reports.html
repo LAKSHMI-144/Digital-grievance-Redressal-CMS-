@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Reports | AdminPro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <link rel="stylesheet" href="../assets/styles.css">
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+        @keyframes blob {
+            0% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .animate-blob {
+            animation: blob 8s infinite ease-in-out;
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.02); border-radius: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+    </style>
+</head>
+<body class="bg-[#0B0F19] text-white font-inter h-screen overflow-hidden flex selection:bg-emerald-500/30 relative">
+
+    <div class="absolute top-[10%] right-[-10%] w-[50rem] h-[50rem] rounded-full bg-cyan-600/10 blur-[150px] mix-blend-screen pointer-events-none z-0 animate-blob"></div>
+    <div class="absolute bottom-[-20%] left-[10%] w-[50rem] h-[50rem] rounded-full bg-emerald-600/10 blur-[150px] mix-blend-screen pointer-events-none z-0 animate-blob" style="animation-delay: 2s;"></div>
+
+    <!-- Sidebar -->
+    <aside class="w-64 glass-panel border-r border-white/5 flex flex-col transition-all duration-300 relative z-20">
+        <div class="p-6 border-b border-white/5 flex flex-col justify-center">
+            <div class="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-600/30 mb-3"><i class="fa-solid fa-user-shield text-white"></i></div>
+            <h1 class="font-bold text-lg tracking-tight">Admin<span class="text-emerald-400">Pro</span></h1>
+            <p class="text-xs text-slate-500 mt-1">Grievance Management</p>
+        </div>
+
+        <nav class="flex-1 p-4 flex flex-col gap-2 relative z-10">
+            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-4 mb-2 pl-3">Menu</p>
+            <a href="admin-dashboard.html" class="flex items-center gap-3 px-3 py-2.5 bg-transparent hover:bg-white/5 text-slate-400 hover:text-white rounded-xl font-medium border border-transparent transition-all group">
+                <i class="fa-solid fa-border-all w-5 text-center group-hover:text-emerald-400 transition-colors"></i> Overview
+            </a>
+            <a href="reports.html" class="flex items-center gap-3 px-3 py-2.5 bg-gradient-to-r from-emerald-500/20 to-emerald-500/5 text-emerald-400 rounded-xl font-medium border border-emerald-500/30 transition-all shadow-[0_0_15px_rgba(16,185,129,0.15)]">
+                <i class="fa-solid fa-folder-open w-5 text-center"></i> Reports
+            </a>
+            <a href="analytics.html" class="flex items-center gap-3 px-3 py-2.5 bg-transparent hover:bg-white/5 text-slate-400 hover:text-white rounded-xl font-medium border border-transparent transition-all group">
+                <i class="fa-solid fa-chart-line w-5 text-center group-hover:text-emerald-400 transition-colors"></i> Analytics
+            </a>
+        </nav>
+
+        <div class="p-4 border-t border-white/5">
+            <button onclick="logout()" class="flex items-center justify-center gap-2 w-full py-2.5 bg-white/5 hover:bg-red-500/20 hover:text-red-400 text-slate-300 rounded-xl font-medium transition-all text-sm border border-white/5">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
+        <header class="h-20 glass-header border-b border-white/5 px-8 flex items-center justify-between z-10">
+            <h2 class="text-xl font-bold text-slate-200">System <span class="text-emerald-400">Reports</span></h2>
+            <div class="flex flex-col items-end">
+                <p class="text-sm font-bold text-white">Super Admin</p>
+                <div class="flex items-center gap-2 text-xs text-emerald-400"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Online</div>
+            </div>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-8 custom-scrollbar">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Configure Report Generator -->
+                <div class="lg:col-span-1">
+                    <div class="glass-card rounded-2xl p-6 border border-white/5 shadow-xl relative z-10 bg-white/[0.02]">
+                        <h3 class="font-bold text-lg mb-6 flex items-center gap-2"><i class="fa-solid fa-file-export text-emerald-400"></i> Generate Custom Report</h3>
+                        
+                        <form id="reportForm" class="space-y-5">
+                            <div>
+                                <label class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Category</label>
+                                <select id="reportCategory" class="w-full mt-2 bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500/50 appearance-none text-sm">
+                                    <option value="all">All Categories</option>
+                                    <option value="Academic">Academic</option>
+                                    <option value="Hostel">Hostel</option>
+                                    <option value="Infrastructure">Infrastructure</option>
+                                    <option value="Maintenance">Maintenance</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Status Filter</label>
+                                <select id="reportStatus" class="w-full mt-2 bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500/50 appearance-none text-sm">
+                                    <option value="all">All Statuses</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="In Progress">In Progress</option>
+                                    <option value="Resolved">Resolved</option>
+                                </select>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Start Date</label>
+                                    <input type="date" id="reportStartDate" class="w-full mt-2 bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500/50 text-sm">
+                                </div>
+                                <div>
+                                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wide">End Date</label>
+                                    <input type="date" id="reportEndDate" class="w-full mt-2 bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500/50 text-sm">
+                                </div>
+                            </div>
+
+                            <div class="pt-4 border-t border-white/10 flex gap-3">
+                                <button type="button" id="btnCsv" class="w-full py-3 bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 rounded-xl font-bold transition-all border border-indigo-500/30 shadow-lg text-sm flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-file-csv"></i> CSV
+                                </button>
+                                <button type="button" id="btnPdf" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)] shadow-lg active:scale-95 text-sm flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-file-pdf"></i> Generate PDF
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Archive Section Removed per request -->
+            </div>
+
+        </div>
+    </main>
+
+    <script src="../assets/script.js"></script>
+    <script>
+        // Report Generation Logic
+        document.addEventListener('DOMContentLoaded', () => {
+            const btnCsv = document.getElementById('btnCsv');
+            const btnPdf = document.getElementById('btnPdf');
+
+            const fetchAndFilterData = async () => {
+                const category = document.getElementById('reportCategory').value;
+                const status = document.getElementById('reportStatus').value;
+                const startDate = document.getElementById('reportStartDate').value;
+                const endDate = document.getElementById('reportEndDate').value;
+
+                try {
+                    const response = await fetch('/api/complaints');
+                    const json = await response.json();
+                    let data = json.data || [];
+
+                    // Apply filters
+                    data = data.filter(item => {
+                        let matchesCategory = category === 'all' || item.category === category;
+                        let matchesStatus = status === 'all' || item.status === status;
+                        
+                        let matchesDate = true;
+                        if (item.createdAt) {
+                            const itemDate = new Date(item.createdAt);
+                            if (startDate) {
+                                matchesDate = matchesDate && (itemDate >= new Date(startDate));
+                            }
+                            if (endDate) {
+                                const endObj = new Date(endDate);
+                                endObj.setHours(23, 59, 59, 999);
+                                matchesDate = matchesDate && (itemDate <= endObj);
+                            }
+                        }
+
+                        return matchesCategory && matchesStatus && matchesDate;
+                    });
+
+                    return data;
+                } catch (e) {
+                    console.error('Failed to fetch data for report', e);
+                    alert('Error fetching report data. Please check connection.');
+                    return [];
+                }
+            };
+
+            btnCsv.addEventListener('click', async () => {
+                const data = await fetchAndFilterData();
+                if(data.length === 0) {
+                    alert('No data found for the selected filters.');
+                    return;
+                }
+
+                // CSV headers
+                let csvContent = "data:text/csv;charset=utf-8,";
+                csvContent += "ID,Student ID,Name,Priority,Category,Title,Status,Created At\n";
+
+                data.forEach(item => {
+                    const row = [
+                        item.id,
+                        item.studentId || item.email || 'N/A',
+                        `"${item.name || ''}"`,
+                        item.priority || 'Medium',
+                        item.category || '',
+                        `"${(item.title || '').replace(/"/g, '""')}"`,
+                        item.status || '',
+                        item.createdAt ? new Date(item.createdAt).toLocaleDateString() : ''
+                    ];
+                    csvContent += row.join(",") + "\n";
+                });
+
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", `Grievance_Report_${new Date().toISOString().split('T')[0]}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+
+            btnPdf.addEventListener('click', async () => {
+                const data = await fetchAndFilterData();
+                if(data.length === 0) {
+                    alert('No data found for the selected filters.');
+                    return;
+                }
+
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                doc.setFontSize(18);
+                doc.text('Grievance Management System - Custom Report', 14, 22);
+                doc.setFontSize(11);
+                doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 30);
+                
+                let filterText = `Category: ${document.getElementById('reportCategory').value} | Status: ${document.getElementById('reportStatus').value}`;
+                doc.text(filterText, 14, 38);
+
+                const tableColumn = ["ID", "Student ID", "Name", "Priority", "Category", "Title", "Status", "Date"];
+                const tableRows = [];
+
+                data.forEach(item => {
+                    const rowData = [
+                        item.id,
+                        item.studentId || item.email || 'N/A',
+                        item.name || 'Anonymous',
+                        item.priority || 'Medium',
+                        item.category || 'N/A',
+                        item.title || '',
+                        item.status || 'Pending',
+                        item.createdAt ? new Date(item.createdAt).toLocaleDateString() : 'N/A'
+                    ];
+                    tableRows.push(rowData);
+                });
+
+                doc.autoTable({
+                    startY: 45,
+                    head: [tableColumn],
+                    body: tableRows,
+                    theme: 'grid',
+                    headStyles: { fillColor: [16, 185, 129] } // Emerald 500
+                });
+
+                doc.save(`Grievance_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+            });
+        });
+    </script>
+</body>
+</html>

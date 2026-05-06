@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000/api';
+const API_URL = "/api";
 
 // ==========================================
 // UTILITY FUNCTIONS
@@ -38,11 +38,6 @@ const checkAuth = (roleRequired) => {
 };
 
 // ==========================================
-<<<<<<< HEAD
-// AUTHENTICATION LOGIC (MOCK)
-// ==========================================
-const handleLogin = (formId, role, redirectUrl) => {
-=======
 // EMAIL NOTIFICATION SERVICE (EmailJS)
 // ==========================================
 // To make this work instantly:
@@ -89,18 +84,11 @@ window.sendOTPToEmail = async (userEmail, otpCode) => {
 // AUTHENTICATION LOGIC (MOCK)
 // ==========================================
 const handleLogin = (formId, role, redirectUrl, requiresOtp = false) => {
->>>>>>> 651a1452676b957ae9eb4aa868234c1a726f14fc
     const form = document.getElementById(formId);
     if (!form) return;
 
     form.addEventListener('submit', (e) => {
         e.preventDefault();
-<<<<<<< HEAD
-        const email = document.getElementById('email').value;
-        const btn = form.querySelector('button[type="submit"]');
-        const origText = btn.innerHTML;
-        
-=======
         
         // Support both old "email" login and new "Student ID" login
         const emailEl = document.getElementById('email');
@@ -115,49 +103,76 @@ const handleLogin = (formId, role, redirectUrl, requiresOtp = false) => {
         
         // --- HARDCODED ROLE VALIDATION ---
         if (role === 'admin') {
-            if (identifier !== 'manyahcmce@gmail.com') {
+            const idenClean = identifier.trim().toLowerCase();
+            if (idenClean !== 'manyahcmce@gmail.com') {
                 alert("Access Denied: Unrecognized Admin Email.");
                 return;
             }
-            if (password !== '241424') {
+            if (password.trim() !== '241424') {
                 alert("Access Denied: Incorrect Password.");
                 return;
             }
         }
         if (role === 'department') {
-            const dept = document.getElementById('deptSelect')?.value;
-            let expectedEmail = '';
-            if (dept === 'Academic') expectedEmail = 'llakshmir895@gmail.com';
-            else if (dept === 'Hostel') expectedEmail = 'nishashankarppa2005@gmail.com';
-            else if (dept === 'Infrastructure') expectedEmail = 'preranagowda454@gmail.com';
-            else if (dept === 'Maintenance') expectedEmail = 'manyahcmce@gmail.com';
+            const emailClean = identifier.trim().toLowerCase();
+            const deptMapping = {
+                'lakshmir895@gmail.com': 'CSE',
+                'vandhuvora2005@gmail.com': 'ENML',
+                'nisha.gowda2004@gmail.com': 'ISE',
+                'prayagowda2004@gmail.com': 'Hostel',
+                'manhc@gmail.com': 'Infrastructure',
+                'priya25gowda@gmail.com': 'Others',
+                'shreya@gmail.com': 'Maintenance'
+            };
+            
+            window.inferredDept = deptMapping[emailClean];
 
-            if (identifier !== expectedEmail) {
-                alert(`Access Denied: Unrecognized Email for ${dept} Unit.`);
+            if (!window.inferredDept) {
+                alert(`Access Denied: Unrecognized Department Email.`);
                 return;
             }
-            if (password !== '241424') {
+            if (password.trim() !== '241424') {
                 alert("Access Denied: Incorrect Password.");
                 return;
             }
         }
         // ---------------------------------
 
->>>>>>> 651a1452676b957ae9eb4aa868234c1a726f14fc
         btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Authenticating...`;
         btn.disabled = true;
 
+        if (role === 'student') {
+            fetch(`${API_URL}/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ studentId: identifier, password: password })
+            })
+            .then(res => res.json().then(data => ({ status: res.status, ok: res.ok, data })))
+            .then(res => {
+                if (!res.ok) {
+                    alert(res.data.error || "Invalid login credentials");
+                    btn.innerHTML = origText;
+                    btn.disabled = false;
+                } else {
+                    localStorage.setItem('user', JSON.stringify({
+                        email: identifier, // keep for compat with older systems
+                        studentId: res.data.data.studentId,
+                        name: res.data.data.name,
+                        role: role,
+                        department: null
+                    }));
+                    window.location.href = redirectUrl;
+                }
+            })
+            .catch(err => {
+                alert("Network error. Is the server running?");
+                btn.innerHTML = origText;
+                btn.disabled = false;
+            });
+            return;
+        }
+
         setTimeout(() => {
-<<<<<<< HEAD
-            // Mock Login
-            localStorage.setItem('user', JSON.stringify({
-                email: email,
-                name: email.split('@')[0],
-                role: role,
-                department: role === 'department' ? document.getElementById('deptSelect')?.value || 'Maintenance' : null
-            }));
-            window.location.href = redirectUrl;
-=======
             if (requiresOtp) {
                 // Generate a 6-digit mock OTP
                 const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -169,7 +184,7 @@ const handleLogin = (formId, role, redirectUrl, requiresOtp = false) => {
                     identifier: identifier,
                     name: identifier.split('@')[0],
                     role: role,
-                    department: role === 'department' ? document.getElementById('deptSelect')?.value || 'Maintenance' : null,
+                    department: role === 'department' ? (window.inferredDept || 'Maintenance') : null,
                     redirectUrl: redirectUrl,
                     otp: otp,
                     expiry: expiry
@@ -187,11 +202,10 @@ const handleLogin = (formId, role, redirectUrl, requiresOtp = false) => {
                     studentId: identifier,
                     name: role === 'student' ? 'Student' : identifier.split('@')[0],
                     role: role,
-                    department: role === 'department' ? document.getElementById('deptSelect')?.value || 'Maintenance' : null
+                    department: role === 'department' ? (window.inferredDept || 'Maintenance') : null
                 }));
                 window.location.href = redirectUrl;
             }
->>>>>>> 651a1452676b957ae9eb4aa868234c1a726f14fc
         }, 1000);
     });
 };
@@ -218,6 +232,33 @@ if (submitForm) {
         });
     }
 
+    const categoryEl = document.getElementById('category');
+    const departmentEl = document.getElementById('department');
+    const departmentContainer = document.getElementById('departmentContainer');
+
+    if (categoryEl && departmentEl && departmentContainer) {
+        const updateDepartments = () => {
+            const cat = categoryEl.value;
+            departmentEl.innerHTML = '';
+            if (cat === 'Academic') {
+                ['CSE', 'ISE', 'AIML'].forEach(d => {
+                    departmentEl.innerHTML += `<option value="${d}">${d}</option>`;
+                });
+                departmentContainer.classList.remove('hidden');
+            } else if (cat === 'Non-Academic') {
+                ['Hostel', 'Infrastructure', 'Maintenance', 'Others'].forEach(d => {
+                    departmentEl.innerHTML += `<option value="${d}">${d}</option>`;
+                });
+                departmentContainer.classList.remove('hidden');
+            } else {
+                departmentContainer.classList.add('hidden');
+            }
+        };
+
+        categoryEl.addEventListener('change', updateDepartments);
+        updateDepartments(); // Run initially
+    }
+
     submitForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const btn = submitForm.querySelector('button[type="submit"]');
@@ -230,8 +271,11 @@ if (submitForm) {
             id: newID,
             studentEmail: user.email,
             studentName: user.name,
+            studentId: user.studentId || user.email.split('@')[0],
+            priority: document.getElementById('priority') ? document.getElementById('priority').value : 'Medium',
             title: document.getElementById('title').value,
             category: document.getElementById('category').value,
+            department: document.getElementById('department') ? document.getElementById('department').value : null,
             description: document.getElementById('description').value,
             image: base64Image,
             status: 'Pending',
@@ -240,7 +284,26 @@ if (submitForm) {
         };
 
         try {
-            // Fallback to local array since our backend might not be perfectly seeded for this schema yet natively
+            // Back-end integration! Feed the real database
+            await fetch('/api/complaints', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id: payload.id,
+                    name: payload.studentName,
+                    email: payload.studentEmail,
+                    studentId: payload.studentId,
+                    priority: payload.priority,
+                    category: payload.category,
+                    department: payload.department,
+                    title: payload.title,
+                    description: payload.description,
+                    image: payload.image,
+                    status: payload.status
+                })
+            });
+
+            // ALSO save to local array since some dashboard table lists rely on it currently
             let local = JSON.parse(localStorage.getItem('sys_complaints') || '[]');
             local.push(payload);
             localStorage.setItem('sys_complaints', JSON.stringify(local));
@@ -249,7 +312,8 @@ if (submitForm) {
             document.getElementById('successState').classList.remove('hidden');
             document.getElementById('displayId').innerText = newID;
         } catch(err) {
-            console.error(err);
+            console.error("Submission error:", err);
+            alert("Failed to submit to server! Please check if backend is running.");
         } finally {
             btn.innerHTML = orig;
             btn.disabled = false;
@@ -260,42 +324,26 @@ if (submitForm) {
 // 2. Student Dashboard List
 if (document.getElementById('studentDashboardList')) {
     const user = checkAuth('student');
-<<<<<<< HEAD
-    document.getElementById('studentNameDisplay').innerText = user.name;
-
-    const renderStudentList = () => {
-        const list = document.getElementById('studentDashboardList');
-        const data = JSON.parse(localStorage.getItem('sys_complaints') || '[]').filter(c => c.studentEmail === user.email);
-        
-        list.innerHTML = '';
-        if(data.length === 0) {
-            list.innerHTML = `<p class="text-slate-500 text-sm">No complaints filed yet.</p>`;
-            return;
-        }
-
-        data.reverse().forEach(c => {
-            list.innerHTML += `
-            <div class="glass-panel p-4 rounded-xl flex items-center justify-between hover:bg-white/5 transition-colors">
-                <div>
-                    <h4 class="font-bold text-slate-200">${c.title}</h4>
-                    <p class="text-xs text-slate-500 font-mono mt-1">${c.id} • ${new Date(c.createdAt).toLocaleDateString()}</p>
-                </div>
-                <div>${getStatusBadge(c.status)}</div>
-            </div>`;
-        });
-    };
-    renderStudentList();
-=======
     if(user) {
         document.getElementById('studentNameDisplay').innerText = user.name;
     
-        const renderStudentList = () => {
+        const renderStudentList = async () => {
             const list = document.getElementById('studentDashboardList');
             const inboxContainer = document.querySelector('.glass-card p.text-orange-400').parentElement.parentElement;
             
             // Handle both older mock data (studentEmail) and newer root-script data (email)
-            const allData = JSON.parse(localStorage.getItem('sys_complaints') || '[]');
-            const data = allData.filter(c => c.email === user.email || c.studentEmail === user.email || c.email === 'student@university.edu');
+            
+            let data = [];
+            try {
+                const res = await fetch('/api/complaints');
+                const json = await res.json();
+                const allData = json.data || [];
+                data = allData.filter(c => c.email === user.email || c.studentEmail === user.email || c.name === user.name || c.email === 'student@university.edu');
+            } catch(e) {
+                const allData = JSON.parse(localStorage.getItem('sys_complaints') || '[]');
+                data = allData.filter(c => c.email === user.email || c.studentEmail === user.email || c.name === user.name || c.email === 'student@university.edu');
+            }
+
             
             list.innerHTML = '';
             let newNotificationsHTML = '';
@@ -331,7 +379,6 @@ if (document.getElementById('studentDashboardList')) {
         };
         renderStudentList();
     }
->>>>>>> 651a1452676b957ae9eb4aa868234c1a726f14fc
 }
 
 // ==========================================
@@ -342,18 +389,62 @@ if(document.getElementById('adminDashboardList')) {
 
     window.assignedDataId = null;
 
-    const renderAdminList = () => {
-        const list = document.getElementById('adminDashboardList');
-        const filter = document.getElementById('adminFilter').value;
-        const data = JSON.parse(localStorage.getItem('sys_complaints') || '[]');
-        
-        // Stats update
-        document.getElementById('statTotal').innerText = data.length;
-        document.getElementById('statUnassigned').innerText = data.filter(c => !c.assignedDepartment).length;
-        document.getElementById('statResolved').innerText = data.filter(c => c.status === 'Resolved').length;
+    const renderAdminList = async () => {
+    const list = document.getElementById('adminDashboardList');
+    const filter = document.getElementById('adminFilter').value;
+    
+    let data = [];
+    try {
+        const response = await fetch('/api/complaints');
+        const json = await response.json();
+        data = json.data || [];
+    } catch (e) {
+        console.error('API fetch failed, falling back to local storage', e);
+        data = JSON.parse(localStorage.getItem('sys_complaints') || '[]');
+    }
+    
+    // Stats update
+    document.getElementById('statTotal').innerText = data.length;
+    document.getElementById('statUnassigned').innerText = data.filter(c => !c.assignedDepartment).length;
+    document.getElementById('statResolved').innerText = data.filter(c => c.status === 'Resolved').length;
 
-        list.innerHTML = '';
-        const filtered = data.filter(c => filter === 'All' || c.category === filter);
+    // Build Department Stats
+    const deptStatsContainer = document.getElementById('departmentStatsContainer');
+    if (deptStatsContainer) {
+        const counts = { 'CSE': 0, 'ISE': 0, 'AIML / ENML': 0, 'Hostel': 0, 'Infrastructure': 0, 'Maintenance': 0, 'Others': 0 };
+        data.forEach(c => {
+            const d = c.department;
+            if (d === 'AIML' || d === 'ENML') {
+                counts['AIML / ENML']++;
+            } else if (counts[d] !== undefined) {
+                counts[d]++;
+            } else if (d) {
+                counts[d] = 1;
+            }
+        });
+        
+        let statsHtml = '';
+        for (const [dept, count] of Object.entries(counts)) {
+            statsHtml += `
+            <div class="glass-card rounded-2xl p-4 border border-white/5 bg-white/[0.02]">
+                <p class="text-xs text-slate-400 font-medium tracking-wide uppercase">${dept}</p>
+                <h3 class="text-2xl font-bold mt-1 text-white">${count}</h3>
+            </div>`;
+        }
+        deptStatsContainer.innerHTML = statsHtml;
+    }
+
+    list.innerHTML = '';
+    const filtered = data.filter(c => {
+        if (filter === 'All') return true;
+        if (filter.startsWith('Category:')) return c.category === filter.split(':')[1];
+        if (filter.startsWith('Dept:')) {
+            let targetDept = filter.split(':')[1];
+            if (targetDept === 'AIML' && (c.department === 'ENML' || c.department === 'AIML')) return true;
+            return c.department === targetDept;
+        }
+        return c.category === filter;
+    });
 
         if(filtered.length === 0) {
             list.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-500">No grievances found.</td></tr>`;
@@ -364,9 +455,10 @@ if(document.getElementById('adminDashboardList')) {
             list.innerHTML += `
             <tr class="hover:bg-white/5 border-b border-white/5 transition-colors">
                 <td class="p-4 font-mono text-indigo-400 text-sm">${c.id}</td>
-                <td class="p-4"><p class="font-bold text-slate-200 text-sm">${c.studentName}</p></td>
+                <td class="p-4"><p class="font-bold text-slate-200 text-sm">${c.name || c.studentName || 'Anonymous'}</p><span class="text-[10px] text-slate-500 font-mono">${c.studentId || c.email}</span></td>
+                <td class="p-4"><span class="px-2 py-1 rounded text-[10px] font-bold border ${c.priority === 'High' ? 'bg-red-500/20 text-red-400 border-red-500/30' : (c.priority === 'Medium' ? 'bg-orange-500/20 text-orange-400 border-orange-500/30' : 'bg-slate-500/20 text-slate-400 border-slate-500/30')}">${c.priority || 'Medium'}</span></td>
                 <td class="p-4 text-sm text-slate-300 w-48 truncate">${c.title}</td>
-                <td class="p-4 text-sm">${c.category}</td>
+                <td class="p-4 text-sm">${c.category} <span class="block text-xs text-slate-400 font-bold mt-1">${c.department || ''}</span></td>
                 <td class="p-4">${getStatusBadge(c.status)}</td>
                 <td class="p-4 text-right">
                     <button onclick="openAdminModal('${c.id}')" class="px-4 py-2 bg-indigo-500/20 text-indigo-400 hover:bg-indigo-500 hover:text-white rounded-lg text-xs font-bold transition-colors">
@@ -377,9 +469,16 @@ if(document.getElementById('adminDashboardList')) {
         });
     };
 
-    window.openAdminModal = (id) => {
-        const data = JSON.parse(localStorage.getItem('sys_complaints') || '[]');
-        const c = data.find(x => x.id === id);
+    window.openAdminModal = async (id) => {
+        let c;
+        try {
+            const res = await fetch(`/api/complaints/${id}`);
+            const json = await res.json();
+            c = json.data;
+        } catch(e) {
+            const data = JSON.parse(localStorage.getItem('sys_complaints') || '[]');
+            c = data.find(x => x.id === id);
+        }
         if(!c) return;
         
         window.assignedDataId = id;
@@ -394,16 +493,24 @@ if(document.getElementById('adminDashboardList')) {
 
     window.closeAdminModal = () => document.getElementById('adminModal').classList.add('hidden');
 
-    document.getElementById('modalAssignBtn').addEventListener('click', () => {
+    document.getElementById('modalAssignBtn').addEventListener('click', async () => {
         const dept = document.getElementById('modalDeptSelect').value;
         if(!dept) return alert("Select a department!");
         
-        let data = JSON.parse(localStorage.getItem('sys_complaints') || '[]');
-        let index = data.findIndex(x => x.id === window.assignedDataId);
-        if(index > -1) {
-            data[index].assignedDepartment = dept;
-            if(data[index].status === 'Pending') data[index].status = 'Assigned';
-            localStorage.setItem('sys_complaints', JSON.stringify(data));
+        try {
+            await fetch(`/api/complaints/${window.assignedDataId}/status`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ assignedDepartment: dept, status: 'Assigned' })
+            });
+        } catch (e) {
+            let data = JSON.parse(localStorage.getItem('sys_complaints') || '[]');
+            let index = data.findIndex(x => x.id === window.assignedDataId);
+            if(index > -1) {
+                data[index].assignedDepartment = dept;
+                if(data[index].status === 'Pending') data[index].status = 'Assigned';
+                localStorage.setItem('sys_complaints', JSON.stringify(data));
+            }
         }
         closeAdminModal();
         renderAdminList();
@@ -422,9 +529,16 @@ if(document.getElementById('deptDashboardList')) {
 
     window.deptDataId = null;
 
-    const renderDeptList = () => {
+    const renderDeptList = async () => {
         const list = document.getElementById('deptDashboardList');
-        const data = JSON.parse(localStorage.getItem('sys_complaints') || '[]').filter(c => c.assignedDepartment === user.department);
+        let data = [];
+        try {
+            const res = await fetch('/api/complaints');
+            const json = await res.json();
+            data = (json.data || []).filter(c => c.assignedDepartment === user.department);
+        } catch(e) {
+            data = JSON.parse(localStorage.getItem('sys_complaints') || '[]').filter(c => c.assignedDepartment === user.department);
+        }
         
         document.getElementById('statAssigned').innerText = data.length;
         document.getElementById('statProgress').innerText = data.filter(c => c.status === 'In Progress').length;
@@ -450,9 +564,16 @@ if(document.getElementById('deptDashboardList')) {
         });
     };
 
-    window.openDeptModal = (id) => {
-        const data = JSON.parse(localStorage.getItem('sys_complaints') || '[]');
-        const c = data.find(x => x.id === id);
+    window.openDeptModal = async (id) => {
+        let c;
+        try {
+            const res = await fetch(`/api/complaints/${id}`);
+            const json = await res.json();
+            c = json.data;
+        } catch(e) {
+            const data = JSON.parse(localStorage.getItem('sys_complaints') || '[]');
+            c = data.find(x => x.id === id);
+        }
         if(!c) return;
         
         window.deptDataId = id;
@@ -467,19 +588,28 @@ if(document.getElementById('deptDashboardList')) {
 
     window.closeDeptModal = () => document.getElementById('deptModal').classList.add('hidden');
 
-    document.getElementById('modalUpdateBtn').addEventListener('click', () => {
+    document.getElementById('modalUpdateBtn').addEventListener('click', async () => {
         const status = document.getElementById('modalStatusSelect').value;
         const note = document.getElementById('modalResponse').value;
         
-        let data = JSON.parse(localStorage.getItem('sys_complaints') || '[]');
-        let index = data.findIndex(x => x.id === window.deptDataId);
-        if(index > -1) {
-            data[index].status = status;
-            if(note.trim()) {
-                data[index].departmentResponse = note;
-            }
-            localStorage.setItem('sys_complaints', JSON.stringify(data));
+        try {
+            await fetch(`/api/complaints/${window.deptDataId}/status`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: status, departmentResponse: note })
+            });
             alert(`Status updated and Student notified: ${status}`);
+        } catch (e) {
+            let data = JSON.parse(localStorage.getItem('sys_complaints') || '[]');
+            let index = data.findIndex(x => x.id === window.deptDataId);
+            if(index > -1) {
+                data[index].status = status;
+                if(note.trim()) {
+                    data[index].departmentResponse = note;
+                }
+                localStorage.setItem('sys_complaints', JSON.stringify(data));
+                alert(`Status updated and Student notified: ${status}`);
+            }
         }
         closeDeptModal();
         renderDeptList();
@@ -487,3 +617,40 @@ if(document.getElementById('deptDashboardList')) {
 
     renderDeptList();
 }
+
+// ==========================================
+// TRACKING LOGIC
+// ==========================================
+window.trackStatus = async () => {
+    const idInput = document.getElementById('trackID');
+    if (!idInput) return;
+    const id = idInput.value.trim().toUpperCase();
+    if (!id) {
+        alert("Please enter a valid Grievance ID");
+        return;
+    }
+    
+    document.getElementById('statusBadge').innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i>`;
+    document.getElementById('statusResult').classList.remove('hidden');
+
+    try {
+        const res = await fetch(`/api/complaints/${id}`);
+        const data = await res.json();
+        
+        if (res.status === 404 || !data.data) {
+            document.getElementById('statusBadge').innerHTML = `<span class="text-red-400">NOT FOUND</span>`;
+            
+            // Fallback checking local array just in case it was created offline
+            let local = JSON.parse(localStorage.getItem('sys_complaints') || '[]');
+            let lc = local.find(x => x.id === id);
+            if(lc) document.getElementById('statusBadge').innerHTML = getStatusBadge(lc.status);
+            
+            return;
+        }
+        
+        const c = data.data;
+        document.getElementById('statusBadge').innerHTML = getStatusBadge(c.status);
+    } catch(err) {
+        document.getElementById('statusBadge').innerHTML = `<span class="text-red-400">ERROR</span>`;
+    }
+};

@@ -2,20 +2,56 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Track | G-Portal</title>
+    <title>Track Grievance | GrievancePortal</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/styles.css">
+    <style>
+        .glass-card { background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .bg-animate { background-size: 400% 400%; animation: bgMove 15s ease infinite; background-image: linear-gradient(-45deg, #0B0F19, #1e1b4b, #0f172a, #064e3b); }
+        @keyframes bgMove { 0% { background-position: 0% 50% } 50% { background-position: 100% 50% } 100% { background-position: 0% 50% } }
+    </style>
 </head>
-<body class="flex justify-center p-6">
-    <div class="glass-panel w-full max-w-md p-10 mt-20 text-center">
-        <h2 class="text-2xl font-bold mb-6">Track Status</h2>
-        <input type="text" id="trackID" placeholder="Enter ID (e.g. GRV-1234)" class="mb-4">
-        <button onclick="trackStatus()" class="btn-3d w-full">Check Progress</button>
-        <div id="statusResult" class="hidden mt-8 p-4 border-t border-white/10">
-            <p class="text-slate-400 text-xs uppercase">Current Status</p>
-            <div id="statusBadge" class="text-2xl font-black mt-2">PENDING</div>
+<body class="bg-animate text-white font-inter min-h-screen flex items-center justify-center p-6 selection:bg-indigo-500/30">
+
+    <div class="w-full max-w-lg glass-card rounded-3xl p-10 md:p-12 shadow-2xl relative z-10 overflow-hidden">
+        <!-- Top decorative gradient -->
+        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500"></div>
+        
+        <div class="text-center mb-8">
+            <div class="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center text-indigo-400 text-2xl mx-auto mb-4 border border-white/10 shadow-inner">
+                <i class="fa-solid fa-magnifying-glass-location"></i>
+            </div>
+            <h2 class="text-3xl font-extrabold tracking-tight">Track Status</h2>
+            <p class="text-slate-400 text-sm mt-2">Enter your Grievance ID to see live progress</p>
+        </div>
+
+        <div class="space-y-6">
+            <div class="relative group">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <i class="fa-solid fa-hashtag text-slate-500 group-focus-within:text-indigo-400 transition-colors"></i>
+                </div>
+                <input type="text" id="trackID" placeholder="e.g. GRV-1234" class="w-full bg-black/20 border border-white/10 rounded-xl pl-11 pr-4 py-4 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-mono tracking-wider">
+            </div>
+            
+            <button onclick="trackStatus()" class="w-full py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-indigo-500/25 active:scale-[0.98] flex items-center justify-center gap-2">
+                Check Progress <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+
+        <div id="statusResult" class="hidden mt-10 pt-8 border-t border-white/10 text-center animate-[fadeIn_0.3s_ease-out]">
+            <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-3">Live Result</p>
+            <div id="statusBadge" class="text-3xl font-black drop-shadow-sm flex items-center justify-center">
+                <!-- Javascript will inject status here -->
+            </div>
+        </div>
+
+        <div class="mt-8 text-center">
+            <a href="index.html" class="text-sm border-b border-transparent hover:border-slate-400 text-slate-400 hover:text-white transition-all"><i class="fa-solid fa-arrow-left mr-1"></i> Back to Home</a>
         </div>
     </div>
-    <script src="script.js"></script>
+    
+    <script src="assets/script.js"></script>
 </body>
 </html>

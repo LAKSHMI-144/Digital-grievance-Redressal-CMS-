@@ -1,0 +1,5 @@
+[
+  {
+    "sql": "CREATE TABLE students (\n            id TEXT PRIMARY KEY,\n            name TEXT,\n            studentId TEXT UNIQUE,\n            password TEXT,\n            email TEXT,\n            phone TEXT,\n            department TEXT,\n            semester TEXT,\n            createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,\n            lastLogin DATETIME\n        )"
+  }
+]
