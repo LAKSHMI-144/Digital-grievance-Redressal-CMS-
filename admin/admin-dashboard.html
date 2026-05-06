@@ -129,15 +129,18 @@
                         <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400"><i class="fa-solid fa-caret-down text-xs"></i></div>
                         <select id="adminFilter" class="bg-[#0B0F19]/80 border border-white/10 hover:border-emerald-500/50 rounded-xl pl-4 pr-10 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 appearance-none transition-all cursor-pointer font-medium shadow-lg">
                             <option value="All">All Complaints</option>
-                            <option value="Category:Academic">Academic (All)</option>
-                            <option value="Dept:CSE">CSE</option>
-                            <option value="Dept:ISE">ISE</option>
-                            <option value="Dept:AIML">AIML / ENML</option>
-                            <option value="Category:Non-Academic">Non-Academic (All)</option>
-                            <option value="Dept:Hostel">Hostel</option>
-                            <option value="Dept:Infrastructure">Infrastructure</option>
-                            <option value="Dept:Maintenance">Maintenance</option>
-                            <option value="Dept:Others">Others</option>
+                            <optgroup label="Academic Departments">
+                                <option value="CSE">🖥️ CSE Department</option>
+                                <option value="ISE">💻 ISE Department</option>
+                                <option value="AIML">🤖 AI & ML Department</option>
+                            </optgroup>
+                            <optgroup label="Other Categories">
+                                <option value="Hostel">🛏️ Hostel/Accommodation</option>
+                                <option value="Infrastructure">🏢 Campus Infrastructure</option>
+                                <option value="Maintenance">🔧 Maintenance</option>
+                                <option value="AdminBlock">📋 Admin Block</option>
+                                <option value="Other">❓ Other</option>
+                            </optgroup>
                         </select>
                     </div>
                 </div>

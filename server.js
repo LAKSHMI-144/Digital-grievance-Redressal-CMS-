@@ -16,16 +16,14 @@ app.use(express.static(__dirname));
 app.post('/api/complaints', (req, res) => {
     const { id, name, email, studentId, category, department, priority, title, description, image, status } = req.body;
     
-    // Academic logic: Ensure department is valid
-    const validAcademic = ['CSE', 'ISE', 'AIML', 'ENML'];
-    if (category === 'Academic') {
-        if (!department || !validAcademic.includes(department.toUpperCase())) {
-            return res.status(400).json({ error: 'Academic complaints must specify a valid department (CSE, ISE, AIML/ENML)' });
-        }
+    // Validate category value
+    const validCategories = ['CSE', 'ISE', 'AIML', 'Hostel', 'Infrastructure', 'Maintenance', 'AdminBlock', 'Other'];
+    if (!category || !validCategories.includes(category)) {
+        return res.status(400).json({ error: 'Invalid category. Must be one of: CSE, ISE, AIML, Hostel, Infrastructure, Maintenance, AdminBlock, Other' });
     }
     
     const sql = `INSERT INTO complaints (id, name, email, studentId, category, department, priority, title, description, image, status, assignedDepartment, departmentResponse) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-    const params = [id, name, email || '', studentId || '', category, department || null, priority || 'Medium', title, description || '', image || '', status || 'Pending', null, null];
+    const params = [id, name, email || '', studentId || '', category, category, priority || 'Medium', title, description || '', image || '', status || 'Pending', null, null];
     
     db.run(sql, params, function(err) {
         if (err) {

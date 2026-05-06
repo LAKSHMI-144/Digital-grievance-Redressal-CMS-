@@ -237,26 +237,11 @@ if (submitForm) {
     const departmentContainer = document.getElementById('departmentContainer');
 
     if (categoryEl && departmentEl && departmentContainer) {
-        const updateDepartments = () => {
-            const cat = categoryEl.value;
-            departmentEl.innerHTML = '';
-            if (cat === 'Academic') {
-                ['CSE', 'ISE', 'AIML'].forEach(d => {
-                    departmentEl.innerHTML += `<option value="${d}">${d}</option>`;
-                });
-                departmentContainer.classList.remove('hidden');
-            } else if (cat === 'Non-Academic') {
-                ['Hostel', 'Infrastructure', 'Maintenance', 'Others'].forEach(d => {
-                    departmentEl.innerHTML += `<option value="${d}">${d}</option>`;
-                });
-                departmentContainer.classList.remove('hidden');
-            } else {
-                departmentContainer.classList.add('hidden');
-            }
-        };
-
-        categoryEl.addEventListener('change', updateDepartments);
-        updateDepartments(); // Run initially
+        // Department dropdown no longer needed - categories are direct
+        const departmentContainer = document.getElementById('departmentContainer');
+        if (departmentContainer) {
+            departmentContainer.classList.add('hidden');
+        }
     }
 
     submitForm.addEventListener('submit', async (e) => {
@@ -266,6 +251,9 @@ if (submitForm) {
         btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Submitting...`;
         btn.disabled = true;
 
+        const category = document.getElementById('category').value;
+        if (!category) return alert('Please select a category');
+        
         const newID = 'GRV-' + Math.floor(1000 + Math.random() * 9000);
         const payload = {
             id: newID,
@@ -274,8 +262,8 @@ if (submitForm) {
             studentId: user.studentId || user.email.split('@')[0],
             priority: document.getElementById('priority') ? document.getElementById('priority').value : 'Medium',
             title: document.getElementById('title').value,
-            category: document.getElementById('category').value,
-            department: document.getElementById('department') ? document.getElementById('department').value : null,
+            category: category,
+            department: category,
             description: document.getElementById('description').value,
             image: base64Image,
             status: 'Pending',
@@ -408,19 +396,25 @@ if(document.getElementById('adminDashboardList')) {
     document.getElementById('statUnassigned').innerText = data.filter(c => !c.assignedDepartment).length;
     document.getElementById('statResolved').innerText = data.filter(c => c.status === 'Resolved').length;
 
-    // Build Department Stats
+    // Build Department Stats based on new category system
     const deptStatsContainer = document.getElementById('departmentStatsContainer');
     if (deptStatsContainer) {
-        const counts = { 'CSE': 0, 'ISE': 0, 'AIML / ENML': 0, 'Hostel': 0, 'Infrastructure': 0, 'Maintenance': 0, 'Others': 0 };
+        const counts = { '🖥️ CSE': 0, '💻 ISE': 0, '🤖 AIML': 0, '🛏️ Hostel': 0, '🏢 Infrastructure': 0, '🔧 Maintenance': 0, '📋 AdminBlock': 0, '❓ Other': 0 };
+        const categoryMap = {
+            'CSE': '🖥️ CSE',
+            'ISE': '💻 ISE',
+            'AIML': '🤖 AIML',
+            'Hostel': '🛏️ Hostel',
+            'Infrastructure': '🏢 Infrastructure',
+            'Maintenance': '🔧 Maintenance',
+            'AdminBlock': '📋 AdminBlock',
+            'Other': '❓ Other'
+        };
+        
         data.forEach(c => {
-            const d = c.department;
-            if (d === 'AIML' || d === 'ENML') {
-                counts['AIML / ENML']++;
-            } else if (counts[d] !== undefined) {
-                counts[d]++;
-            } else if (d) {
-                counts[d] = 1;
-            }
+            const category = c.category;
+            const key = categoryMap[category];
+            if (key) counts[key]++;
         });
         
         let statsHtml = '';
@@ -437,12 +431,6 @@ if(document.getElementById('adminDashboardList')) {
     list.innerHTML = '';
     const filtered = data.filter(c => {
         if (filter === 'All') return true;
-        if (filter.startsWith('Category:')) return c.category === filter.split(':')[1];
-        if (filter.startsWith('Dept:')) {
-            let targetDept = filter.split(':')[1];
-            if (targetDept === 'AIML' && (c.department === 'ENML' || c.department === 'AIML')) return true;
-            return c.department === targetDept;
-        }
         return c.category === filter;
     });
 
