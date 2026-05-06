@@ -25,7 +25,7 @@
         <form id="studentLoginForm" class="space-y-5">
             <div>
                 <label class="text-xs font-semibold text-slate-300 uppercase tracking-wide">Student ID</label>
-                <input type="text" id="studentId" required pattern="4MC23CS[0-9]{3}" title="Format: 4MC23CSXXX (e.g. 4MC23CS001)" class="w-full mt-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/50 transition-colors uppercase" placeholder="e.g. 4MC23CS073">
+                <input type="text" id="studentId" required pattern="4MC23CS[0-9]{3}" title="Format: 4MC23CSXXX (e.g. 4MC23CS001)" class="w-full mt-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/50 transition-colors" placeholder="e.g. 4MC23CS073">
             </div>
             <div>
                 <label class="text-xs font-semibold text-slate-300 uppercase tracking-wide">Password</label>
@@ -44,6 +44,11 @@
 
     <script src="../assets/script.js"></script>
     <script>
+        // Auto-convert Student ID to uppercase
+        document.getElementById('studentId').addEventListener('input', (e) => {
+            e.target.value = e.target.value.toUpperCase();
+        });
+
         document.getElementById('studentLoginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = e.target.querySelector('button[type="submit"]');
