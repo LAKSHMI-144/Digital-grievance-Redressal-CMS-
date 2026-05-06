@@ -122,24 +122,23 @@ if (submitForm) {
         };
 
         try {
-            // First, try to fetch to the real backend with a very short timeout
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 800);
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-            let res = null;
-            try {
-                res = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload),
-                    signal: controller.signal
-                });
-            } catch(e) {
-                // Fetch aborted or failed to connect
-            }
+            const res = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+                signal: controller.signal
+            });
             clearTimeout(timeoutId);
 
-            // Regardless of backend success, force local storage update so UI is instant and never hangs
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}));
+                throw new Error(errorData.error || `Server returned ${res.status}`);
+            }
+
+            // Backend persisted successfully; mirror locally as a cache only
             let local = JSON.parse(localStorage.getItem('sys_complaints') || '[]');
             local.push(payload);
             localStorage.setItem('sys_complaints', JSON.stringify(local));
@@ -159,7 +158,7 @@ if (submitForm) {
 
         } catch (error) {
             console.error("Submission error:", error);
-            alert("An error occurred during submission.");
+            alert("Failed to save complaint to the server. Please try again or contact support.");
         } finally {
             submitBtn.innerHTML = originalText;
             submitBtn.disabled = false;
